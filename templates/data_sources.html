@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Sources — FETA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c1c14;
+      --paper: #f4f2eb;
+      --cream: #f0ead8;
+      --gold: #e8b84b;
+      --gold-dark: #c49428;
+      --peach: #e8a882;
+      --peach-pale: #f5ddd0;
+      --sky: #89c4d4;
+      --sky-pale: #d8eff5;
+      --sky-dark: #4a9ab0;
+      --green: #407F3D;
+      --green-dark: #2e5c2c;
+      --green-light: #5a9e57;
+      --green-pale: #d6ecd5;
+      --red-soft: #c44a3a;
+      --border: #d4cebc;
+      --shadow: rgba(45, 92, 44, 0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background-color: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 0.6rem; }
+    .nav-brand-logo { height: 32px; width: auto; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.45rem 0.8rem;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-links a.active { background: rgba(255,255,255,0.18); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, var(--green) 100%);
+      padding: 3.5rem 2.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.9rem;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── LAYOUT ── */
+    .ds-body {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .ds-section-title {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 2px solid var(--green-pale);
+    }
+    .ds-section-title:first-child { margin-top: 0; }
+
+    /* ── INTRO NOTE ── */
+    .ds-intro {
+      background: var(--sky-pale);
+      border-left: 4px solid var(--sky-dark);
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: #2a4a55;
+    }
+
+    /* ── CARDS ── */
+    .ds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .ds-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      box-shadow: 0 1px 4px var(--shadow);
+      transition: box-shadow 0.15s;
+    }
+    .ds-card:hover { box-shadow: 0 3px 10px var(--shadow); }
+
+    .ds-card-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--green-dark);
+    }
+    .ds-card-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      background: var(--green-pale);
+      color: var(--green-dark);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .ds-card-tag.tag-b73only {
+      background: #fff0d0;
+      color: #7a4000;
+    }
+    .ds-card-tag.tag-both {
+      background: var(--sky-pale);
+      color: #1a4a5a;
+    }
+    .ds-card-desc {
+      font-size: 0.82rem;
+      color: #555;
+      line-height: 1.6;
+      flex: 1;
+    }
+    .ds-card-meta {
+      font-size: 0.75rem;
+      color: #888;
+      font-family: 'DM Mono', monospace;
+      margin-top: 0.25rem;
+    }
+    .ds-card-cite {
+      font-size: 0.75rem;
+      color: var(--sky-dark);
+      margin-top: 0.2rem;
+    }
+    .ds-card-cite a {
+      color: var(--sky-dark);
+      text-decoration: none;
+    }
+    .ds-card-cite a:hover { text-decoration: underline; }
+
+    /* ── GENOME TABLE ── */
+    .genome-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .genome-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+    .genome-table thead tr { background: var(--green); }
+    .genome-table thead th {
+      padding: 0.6rem 1rem;
+      text-align: left;
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+      font-size: 0.82rem;
+    }
+    .genome-table tbody tr { border-bottom: 1px solid var(--border); }
+    .genome-table tbody tr:last-child { border-bottom: none; }
+    .genome-table tbody tr:hover { background: var(--sky-pale); }
+    .genome-table tbody td {
+      padding: 0.5rem 1rem;
+      white-space: nowrap;
+    }
+    .genome-table td:nth-child(2) {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--green-dark);
+    }
+
+    /* ── PLACEHOLDER STYLE ── */
+    .placeholder {
+      background: #fff8ee;
+      border: 1px dashed #e8c84a;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.78rem;
+      color: #7a5500;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      color: #888;
+      border-top: 1px solid var(--border);
+      background: var(--cream);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <img class="nav-brand-logo"
+         src="{{ url_for('static', filename='images/feta_banner.png') }}"
+         alt="FETA">
+  </div>
+  <div class="nav-links">
+    <a href="/">B73 Enrichment</a>
+    <a href="/nonb73">Non-B73 Enrichment</a>
+    <a href="/analytics">Other Analytics</a>
+    <a href="/data-sources" class="active">Data Sources</a>
+    <a href="/faq">FAQ</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Reference</div>
+    <h1>Data <em>Sources</em></h1>
+    <p class="hero-sub">Annotation databases, tools, and genome assemblies underlying FETA's enrichment analyses.</p>
+  </div>
+</div>
+
+<div class="ds-body">
+
+  <div class="ds-intro">
+    All annotations were generated against specific genome assembly versions and are static snapshots — they are not updated automatically. Where a tool or database has been updated since annotation, results may differ from a live query against that resource. Tags indicate whether a source is available for <strong>B73 only</strong> or <strong>both B73 and NAM lines</strong>.
+  </div>
+
+  <!-- ─────────────────── GENOME ASSEMBLIES ─────────────────── -->
+  <h2 class="ds-section-title">Genome Assemblies</h2>
+
+  <div class="ds-intro" style="margin-bottom:1rem;">
+    FETA supports the B73 v5 reference genome and 25 NAM founder line assemblies. Gene model ID prefixes are used to automatically detect the genotype from your input list.
+  </div>
+
+  <div class="genome-table-wrap">
+    <table class="genome-table">
+      <thead>
+        <tr>
+          <th>Genotype</th>
+          <th>Gene Model Prefix</th>
+          <th>Assembly Version</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>B73</td><td>Zm00001eb</td><td>Zm-B73-REFERENCE-NAM-5.0</td><td><a href="https://download.maizegdb.org/Zm-B73-REFERENCE-NAM-5.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+
+        <tr><td>B97</td><td>Zm00018ab</td><td>Zm-B97-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-B97-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML52</td><td>Zm00019ab</td><td>Zm-CML52-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML52-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML69</td><td>Zm00020ab</td><td>Zm-CML69-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML69-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML103</td><td>Zm00021ab</td><td>Zm-CML103-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML103-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML228</td><td>Zm00022ab</td><td>Zm-CML228-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML228-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML247</td><td>Zm00023ab</td><td>Zm-CML247-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML247-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML277</td><td>Zm00024ab</td><td>Zm-CML277-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML277-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML322</td><td>Zm00025ab</td><td>Zm-CML322-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML322-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>CML333</td><td>Zm00026ab</td><td>Zm-CML333-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML333-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>HP301</td><td>Zm00027ab</td><td>Zm-HP301-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-HP301-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Il14H</td><td>Zm00028ab</td><td>Zm-Il14H-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Il14H-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Ki3</td><td>Zm00029ab</td><td>Zm-Ki3-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ki3-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Ki11</td><td>Zm00030ab</td><td>Zm-Ki11-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ki11-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Ky21</td><td>Zm00031ab</td><td>Zm-Ky21-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ky21-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>M37W</td><td>Zm00032ab</td><td>Zm-M37W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-M37W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>M162W</td><td>Zm00033ab</td><td>Zm-M162W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-M162W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Mo18W</td><td>Zm00034ab</td><td>Zm-Mo18W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Mo18W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Ms71</td><td>Zm00035ab</td><td>Zm-Ms71-REFERENCE-NAM-1.0/</td><td><a href="https://download.maizegdb.org/Zm-Ms71-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>NC350</td><td>Zm00036ab</td><td>Zm-NC350-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-NC350-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>NC358</td><td>Zm00037ab</td><td>Zm-NC358-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-NC358-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Oh7B</td><td>Zm00038ab</td><td>Zm-Oh7B-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Oh7B-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Oh43</td><td>Zm00039ab</td><td>Zm-Oh43-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Oh43-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>P39</td><td>Zm00040ab</td><td>Zm-P39-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-P39-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Tx303</td><td>Zm00041ab</td><td>Zm-Tx303-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Tx303-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+        
+        <tr><td>Tzi8</td><td>Zm00042ab</td><td>Zm-Tzi8-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Tzi8-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─────────────────── GO TERMS ─────────────────── -->
+  <h2 class="ds-section-title">Gene Ontology (GO) Terms</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">GOMAP</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Gene Ontology Meta Annotator for Plants. Integrates multiple evidence types including sequence homology, domain-based inference, and literature mining to produce high-coverage GO annotations for plant genomes.</p>
+      <p class="ds-card-meta">Source:<a href="https://datacommons.cyverse.org/browse/iplant/home/shared/commons_repo/curated/Carolyn_Lawrence_Dill_GOMAP_Maize_MaizeGDB_B73_NAM_5.0_October_2022_v2.r1" target="_blank">Cyverse repo</a></p>
+      <p class="ds-card-meta">Version: <span class="placeholder">October_2022_v2.r1</span></p>
+      <p class="ds-card-cite">Wimalanathan &amp; Lawrence-Dill, <em>Plant Cell Physiol.</em> 2021 · <a href="https://doi.org/10.1093/pcp/pcab008" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">EnTAP GO</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">GO terms assigned via the Eukaryotic Non-Model Transcriptome Annotation Pipeline (EnTAP), which uses sequence similarity searches against reference protein databases to transfer GO annotations. </p>
+      <p class="ds-card-cite">Hart et al., <em>Mol. Ecol. Resour.</em> 2020 · <a href="https://doi.org/10.1111/1755-0998.13106" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">PANNZER GO</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc"> GO terms assigned via the Protein ANNotation with Z-score EnRichment (PANNZER) classifier, which uses weighted K-nearest neighbor approaches to infer functional annotations based on sequence similarity. </p>
+      <p class="ds-card-cite">Törönen et al., <em>Nucleic Acids Res.</em> 2018 · <a href="https://doi.org/10.1093/nar/gky350" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">GO Expanded</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">A non-redundant union of all available GO annotations for each genotype, with full propagation up the GO hierarchy (true path rule). Provides the broadest coverage and is the recommended default for most analyses.</p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── PATHWAYS ─────────────────── -->
+  <h2 class="ds-section-title">Pathways</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">EnTAP KEGG</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Kyoto Encyclopedia of Genes and Genomes (KEGG) pathway annotations assigned via EnTAP sequence similarity search against the KEGG protein database. </p>
+      <p class="ds-card-cite"><a href="https://www.kegg.jp" target="_blank">kegg.jp</a> · Kanehisa et al., <em>Nucleic Acids Res.</em> 2023</p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">CornCyc (MaizeCyc)</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Maize metabolic pathway database derived from the PlantCyc framework. Gene-to-pathway associations curated from literature and computational predictions for maize metabolism.</p>
+      <p class="ds-card-cite"><a href="https://www.maizegdb.org/metabolic_pathways" target="_blank">MaizeGDB CornCyc</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">Reactome</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Plant pathway annotations from the Reactome knowledgebase, transferred to maize B73 gene models via orthology-based projection.</p>
+      <p class="ds-card-cite">Milacic et al., <em>Nucleic Acids Res.</em> 2024 · <a href="https://reactome.org" target="_blank">reactome.org</a></p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── ENZYME / EC ─────────────────── -->
+  <h2 class="ds-section-title">Enzyme Commission (EC)</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">PANNZER EC</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">EC numbers assigned by PANNZER via homology-based annotation against reference enzyme databases. </p>
+      <p class="ds-card-cite">Törönen et al., <em>Nucleic Acids Res.</em> 2018 · <a href="https://doi.org/10.1093/nar/gky350" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">E2P2 EC</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">EC number annotations assigned by the Ensemble Enzyme Prediction Pipeline (E2P2), which uses sequence homology to infer metabolic-related functions. </p>
+      <p class="ds-card-cite">Schläpfer et al., <em>Plant Physiol.</em> 2017 · <a href="https://doi.org/10.1104/pp.16.01942" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">EC Expanded</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Non-redundant union of PANNZER EC and E2P2 EC annotations, with hierarchical propagation to parent EC classes. </p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── PROTEIN DOMAINS ─────────────────── -->
+  <h2 class="ds-section-title">Protein Domains</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">Pfam</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">Protein family (Pfam) domain annotations from the Pfam database, assigned by HMMER profile searches against the Pfam-A HMM library. </p>
+      <p class="ds-card-cite">Mistry et al., <em>Nucleic Acids Res.</em> 2021 · <a href="https://pfam.xfam.org" target="_blank">pfam.xfam.org</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">InterProScan</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc"> Protein domain classifications from the InterProScan software package. It identifies protein families, domains, and functional sites by combining multiple diagnostic resources (e.g., Pfam, PROSITE, SMART,PRINTS, PANTHER, Gene3D) in one workflow.</p>
+      <p class="ds-card-cite">Paysan-Lafosse et al., <em>Nucleic Acids Res.</em> 2023 · <a href="https://www.ebi.ac.uk/interpro" target="_blank">ebi.ac.uk/interpro</a></p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── CELL TYPE ─────────────────── -->
+  <h2 class="ds-section-title">Cell Type (scATAC)</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">scATAC-seq Cell Type Annotations</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Cell type accessibility annotations derived from single-cell ATAC-seq data in maize. Genes are linked to accessible chromatin regions in specific cell types, enabling enrichment of genes preferentially active in particular tissues or cell populations.</p>
+      <p class="ds-card-cite"><span class="placeholder">add citation</span></p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── LOCI ─────────────────── -->
+  <h2 class="ds-section-title">Loci</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">Loci Annotations</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc"> Named loci, QTL intervals, curated genetic regions, or chromosomal features. </p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── AGRONOMIC TRAITS ─────────────────── -->
+  <h2 class="ds-section-title">Agronomic Traits (GWAS)</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">Wallace et al. 2014 GWAS</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">Genome-wide association study linking maize genes to agronomic traits. Gene-to-trait associations derived from significant GWAS hits mapped to B73 v5 gene models. </p>
+      <p class="ds-card-cite">Wallace et al., <em>PLOS Genetics</em> 2014 · <a href="https://doi.org/10.1371/journal.pgen.1004845" target="_blank">DOI</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">GWAS Atlas Database</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">A curated compendium of published maize GWAS results aggregated from the GWAS Atlas resource. Gene-to-trait links are derived from significant associations mapped to B73 v5 gene coordinates.</p>
+      <p class="ds-card-cite">Canela-Xandri et al., <em>Nature Genetics</em> 2018 · <a href="https://atlas.ctglab.nl" target="_blank">atlas.ctglab.nl</a></p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── SUBCELLULAR LOCALIZATION ─────────────────── -->
+  <h2 class="ds-section-title">Subcellular Localization</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">DeepLoc 2.1</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">Deep learning-based subcellular localization predictor. Protein sequences are classified by cellular compartments (e.g.,plastid, mitochondrion, nucleus), signal protein, and solubility. </p>
+      <p class="ds-card-cite">Ødum et al., <em>Nucleic Acids Res.</em> 2024 <a href="https://doi.org/10.1093/nar/gkae237" target="_blank">DOI</a></p>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── OTHER ANALYTICS ─────────────────── -->
+  <h2 class="ds-section-title">Other Analytics</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">Phylostratr</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">Phylostratigraphic age assignments for maize genes. Each gene is classified into one of 14 phylostrata representing the taxonomic level at which the gene family first appeared, from cellular organisms (stratum 1) to species-specific genes (stratum 14). </p>
+      <p class="ds-card-cite">Tibbs-Cortez et al., <em> Manuscript forthcoming.</em></p>
+      <p class="ds-card-desc"><a href="http://phylostrata.maizegdb.org" target="_blank"> MaizeGDB Phylostratr Tool</a></p>
+    </div>
+
+    <div class="ds-card">
+      <span class="ds-card-name">PSAURON</span>
+      <span class="ds-card-tag tag-both">B73 + NAM</span>
+      <p class="ds-card-desc">Protein Sequence Assessment Using a Reference ORF Network (PSAURON). Scores for each gene on a 0.0–1.0 scale reflects the likelihood that the sequence is a genuine protein-coding region. </p>
+      <p class="ds-card-cite">Sommer et al.,<em>NAR Genom. Bioinform.</em> 2025 <a href="https://doi.org/10.1093/nargab/lqae189" target="_blank">DOI</a>
+    </div>
+
+  </div>
+
+</div><!-- end .ds-body -->
+
+<footer>
+  FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Maize Genetics &amp; Genomics
+</footer>
+
+</body>
+</html>

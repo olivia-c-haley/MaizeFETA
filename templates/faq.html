@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — FETA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c1c14;
+      --paper: #f4f2eb;
+      --cream: #f0ead8;
+      --gold: #e8b84b;
+      --gold-dark: #c49428;
+      --peach: #e8a882;
+      --peach-pale: #f5ddd0;
+      --sky: #89c4d4;
+      --sky-pale: #d8eff5;
+      --sky-dark: #4a9ab0;
+      --green: #407F3D;
+      --green-dark: #2e5c2c;
+      --green-light: #5a9e57;
+      --green-pale: #d6ecd5;
+      --red-soft: #c44a3a;
+      --border: #d4cebc;
+      --shadow: rgba(45, 92, 44, 0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background-color: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 0.6rem; }
+    .nav-brand-logo { height: 32px; width: auto; }
+    .nav-brand-text {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.3;
+    }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.45rem 0.8rem;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-links a.active { background: rgba(255,255,255,0.18); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, #407F3D 100%);
+      padding: 3.5rem 2.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.9rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .faq-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .faq-section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--green-dark);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid var(--green-pale);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .faq-section-title:first-child { margin-top: 0; }
+
+    /* ── ACCORDION ITEMS ── */
+    .faq-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      overflow: hidden;
+      box-shadow: 0 1px 4px var(--shadow);
+      transition: box-shadow 0.15s;
+    }
+    .faq-item:hover { box-shadow: 0 3px 10px var(--shadow); }
+    .faq-item.open { border-color: var(--green); }
+
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+      transition: background 0.12s;
+    }
+    .faq-q:hover { background: var(--green-pale); }
+    .faq-item.open .faq-q { background: var(--green-pale); color: var(--green-dark); }
+
+    .faq-chevron {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      margin-top: 1px;
+      color: var(--green);
+      transition: transform 0.2s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    .faq-a {
+      display: none;
+      padding: 0 1.2rem 1.1rem 1.2rem;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: #444;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item.open .faq-a { display: block; }
+    .faq-a p { margin-bottom: 0.7rem; }
+    .faq-a p:last-child { margin-bottom: 0; }
+    .faq-a ul { margin: 0.4rem 0 0.7rem 1.2rem; }
+    .faq-a li { margin-bottom: 0.35rem; }
+    .faq-a code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--cream);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      color: var(--green-dark);
+    }
+    .faq-a strong { color: var(--ink); }
+    .faq-a a { color: var(--sky-dark); text-decoration: none; }
+    .faq-a a:hover { text-decoration: underline; }
+
+    /* ── CALLOUT BOX ── */
+    .faq-callout {
+      background: var(--sky-pale);
+      border-left: 4px solid var(--sky-dark);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin: 0.7rem 0;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: #2a4a55;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      color: #888;
+      border-top: 1px solid var(--border);
+      background: var(--cream);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <img class="nav-brand-logo"
+         src="{{ url_for('static', filename='images/feta_banner.png') }}"
+         alt="FETA">
+    
+  </div>
+  <div class="nav-links">
+    <a href="/">B73 Enrichment</a>
+    <a href="/nonb73">Non-B73 Enrichment</a>
+    <a href="/analytics">Other Analytics</a>
+    <a href="/data-sources">Data Sources</a>
+    <a href="/faq" class="active">FAQ</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Documentation</div>
+    <h1>Frequently Asked<br><em>Questions</em></h1>
+    <p class="hero-sub">Answers to common questions about FETA's methods, inputs, statistics, and outputs.</p>
+  </div>
+</div>
+
+<div class="faq-body">
+
+  <!-- ─────────────────────────────── GENERAL ─────────────────────────────── -->
+  <h2 class="faq-section-title">General</h2>
+
+  <div class="faq-item open">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What is FETA?
+    </button>
+    <div class="faq-a">
+      <p>FETA (<strong>Functional Enrichment Term Analysis</strong>) is a web-based tool for performing gene set enrichment analysis in maize (<em>Zea mays</em>). Given a list of gene models, FETA tests whether specific biological functions, pathways, protein domains, or subcellular localizations are statistically over- or under-represented relative to a defined background population.</p>
+      <p>FETA supports both the B73 reference genome and 25 additional NAM (Nested Association Mapping) founder lines, making it broadly useful across the maize research community.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      Which maize genotypes are supported?
+    </button>
+    <div class="faq-a">
+      <p>The B73 Enrichment page supports the <strong>B73 v5 reference genome</strong>. The Non-B73 Enrichment page supports 25 NAM founder lines including B97, CML52, CML69, CML103, CML228, CML247, CML277, CML322, CML333, HP301, Il14H, Ki3, Ki11, Ky21, M37W, M162W, Mo18W, Ms71, NC350, NC358, Oh7B, Oh43, P39, Tx303, and Tzi8.</p>
+      <p>FETA automatically detects which background to use based on the gene model ID prefix in your input list (e.g., <code>Zm00001eb</code> for B73, <code>Zm00018ab</code> for B97).</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      How do I cite FETA in my publication?
+    </button>
+    <div class="faq-a">
+      <p>A manuscript describing FETA is currently in preparation. In the meantime, please cite this tool by its URL and acknowledge the annotation databases used in your analysis (see the Data Sources page for individual citation recommendations).</p>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────── INPUT & SETUP ───────────────────────────── -->
+  <h2 class="faq-section-title">Input &amp; Setup</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What format should my gene list be in?
+    </button>
+    <div class="faq-a">
+      <p>Paste one gene model ID per line in the text box. Gene models should follow standard maize nomenclature, for example:</p>
+      <ul>
+        <li>B73: <code>Zm00001eb428070</code></li>
+        <li>B97: <code>Zm00018ab012345</code></li>
+      </ul>
+      <p>Trailing whitespace, carriage returns, and blank lines are automatically stripped. Gene model suffixes (e.g. <code>.1</code>, <code>.2</code>) are not required and are not expected.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What is the background gene set, and can I customise it?
+    </button>
+    <div class="faq-a">
+      <p>The <strong>background</strong> (also called the universe or reference set) defines the pool of genes against which enrichment is tested. By default, FETA uses all annotated gene models for the detected genotype.</p>
+      <p>You can supply a custom background by pasting a second gene list into the background field. This is recommended when your query genes were derived from a pre-filtered experiment (e.g., only expressed genes, only genes with a protein structure prediction) — using the full genome as a background in such cases can inflate significance.</p>
+      <div class="faq-callout">
+        💡 <strong>Best practice:</strong> The background should represent the set of genes that <em>could</em> have been detected in your experiment, not all genes in the genome.
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      How many genes do I need for a meaningful analysis?
+    </button>
+    <div class="faq-a">
+      <p>There is no hard minimum, but enrichment analyses generally perform better with larger gene sets. As a rough guide:</p>
+      <ul>
+        <li><strong>&lt; 20 genes:</strong> Results may be unreliable due to low statistical power. Interpret with caution.</li>
+        <li><strong>20–100 genes:</strong> Reasonable for focused analyses; biological context should guide interpretation.</li>
+        <li><strong>&gt; 100 genes:</strong> Sufficient for robust enrichment detection across most annotation categories.</li>
+      </ul>
+      <p>Very large gene lists (&gt; 5,000 genes) may also be uninformative, as they often capture a large fraction of the genome and many terms will appear significant by chance.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What happens to genes in my list that are not found in the background?
+    </button>
+    <div class="faq-a">
+      <p>Genes not present in the annotation database for the detected genotype are silently excluded from the enrichment calculation. The <strong>Load Genes</strong> button above the textarea will flag any such genes before you run the full analysis, so you can verify your list and correct any ID formatting issues in advance.</p>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────── STATISTICS ─────────────────────────────── -->
+  <h2 class="faq-section-title">Statistics</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What statistical test does FETA use for enrichment?
+    </button>
+    <div class="faq-a">
+      <p>FETA uses a one-tailed <strong>Fisher's Exact Test</strong> for each annotation term, comparing the proportion of query genes annotated to a term against the proportion in the background. The 2×2 contingency table is:</p>
+      <ul>
+        <li>In term &amp; in query</li>
+        <li>In term &amp; not in query</li>
+        <li>Not in term &amp; in query</li>
+        <li>Not in term &amp; not in query</li>
+      </ul>
+      <p>Each term is tested independently, then p-values are corrected for multiple comparisons.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What multiple testing correction methods are available?
+    </button>
+    <div class="faq-a">
+      <p>FETA offers two correction methods, selectable in the settings panel:</p>
+      <ul>
+        <li><strong>Benjamini-Hochberg (BH / FDR):</strong> Controls the false discovery rate. Recommended for exploratory analyses where some false positives are tolerable. This is the default.</li>
+        <li><strong>Bonferroni:</strong> Controls the family-wise error rate. More conservative; appropriate when you need to minimise false positives, but will reduce power considerably for large annotation sets.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What does the p-value threshold apply to — raw or adjusted p-values?
+    </button>
+    <div class="faq-a">
+      <p>The threshold you set applies to the <strong>adjusted p-value</strong> (after multiple testing correction). Only terms passing this threshold are displayed in the results. The raw p-values are retained internally and included in downloaded TSV files.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What does "over-enriched" vs "under-enriched" mean?
+    </button>
+    <div class="faq-a">
+      <p><strong>Over-enriched</strong> terms appear in your query genes at a higher proportion than in the background — suggesting your gene set is functionally biased toward that term. <strong>Under-enriched</strong> terms appear less frequently than expected, indicating your gene set may be depleted for that function.</p>
+      <p>Both directions are biologically meaningful. For example, a set of stress-responsive genes might be over-enriched for defense pathways and under-enriched for housekeeping processes like ribosome biogenesis.</p>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────── ANNOTATIONS ────────────────────────────── -->
+  <h2 class="faq-section-title">Annotation Sources</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      Which GO annotation sources are available, and how do they differ?
+    </button>
+    <div class="faq-a">
+      <p>FETA provides multiple GO annotation pipelines for B73, which differ in the method used to assign GO terms:</p>
+      <ul>
+        <li><strong>GOMAP:</strong> Gene Ontology Meta Annotator for Plants — a pipeline specifically designed for plant genomes that integrates multiple evidence sources.</li>
+        <li><strong>PANNZER:</strong> Probabilistic ANNotation with Z-score EnRichment — a homology-based annotator that predicts GO terms from sequence similarity.</li>
+        <li><strong>EnTAP:</strong> Eukaryotic Non-Model Transcriptome Annotation Pipeline — combines homology search with functional database queries.</li>
+        <li><strong>GO Expanded:</strong> A combined, non-redundant set integrating all of the above with propagation up the GO hierarchy.</li>
+      </ul>
+      <p>For most analyses, <strong>GO Expanded</strong> provides the broadest coverage. Individual pipelines are provided for transparency and comparison.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What is the DeepLoc / Subcellular Localization category?
+    </button>
+    <div class="faq-a">
+      <p><strong>DeepLoc</strong> is a deep learning-based tool that predicts the subcellular localization of proteins from their amino acid sequences. FETA uses DeepLoc predictions to test whether your gene set is enriched for proteins targeting specific compartments such as the plastid, mitochondrion, nucleus, endoplasmic reticulum, and others.</p>
+      <p>Results are displayed as an interactive plant cell diagram where each compartment is coloured by enrichment direction and significance. Hovering over a compartment shows the −log₁₀(p) value and number of hit genes.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What are the PhylostratrR and PSAURON analyses on the Other Analytics page?
+    </button>
+    <div class="faq-a">
+      <p><strong>PhylostratrR</strong> assigns each gene to a phylostratum — a taxonomic age class representing when that gene's family first appeared in evolution. The analysis tests whether your query set is biased toward older (conserved) or younger (lineage-specific) genes. An overall Chi-squared test assesses the full distribution, while per-stratum Fisher's Exact Tests (Benjamini-Hochberg corrected) identify which specific ages are over- or under-represented.</p>
+      <p><strong>PSAURON</strong> scores how well each gene's expression profile matches a canonical "housekeeping" pattern. FETA compares your query set's PSAURON score distribution against the genome-wide background using a Mann-Whitney U test (shift in central tendency), a Kolmogorov-Smirnov test (distributional shape), and a Chi-squared test on the binary housekeeping classification. This can reveal whether your gene set is unusually constitutively expressed or unusually condition-specific.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      Are annotation databases updated, and what versions are used?
+    </button>
+    <div class="faq-a">
+      <p>Annotations are tied to specific genome releases and pipeline versions and are not updated automatically. The B73 annotations are based on the <strong>B73 v5 genome assembly</strong>. Version details for each annotation pipeline are provided on the Data Sources page. If you require the most current annotations, we recommend checking the primary databases (MaizeGDB, KEGG, UniProt) directly.</p>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────── RESULTS ────────────────────────────────── -->
+  <h2 class="faq-section-title">Interpreting Results</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What does the bar chart show, and how should I read it?
+    </button>
+    <div class="faq-a">
+      <p>The bar chart displays significant terms ranked by −log₁₀(adjusted p-value). Longer bars indicate stronger statistical evidence. <strong>Green bars</strong> represent over-enriched terms; <strong>orange/red bars</strong> represent under-enriched terms. The chart is capped at the top 30 terms by default for readability.</p>
+      <p>Note that statistical significance does not always equal biological importance — a highly significant term may simply reflect the redundancy of a large gene family. Always cross-reference results with biological knowledge of your system.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What is the CNET (concept network) plot?
+    </button>
+    <div class="faq-a">
+      <p>The CNET plot is a bipartite network showing connections between <strong>enriched terms</strong> (coloured rectangular nodes) and the <strong>individual genes</strong> (small circular nodes) that contributed to each term's enrichment. It is particularly useful for:</p>
+      <ul>
+        <li>Identifying "hub" genes that contribute to multiple enriched terms simultaneously.</li>
+        <li>Spotting clusters of terms that are driven by the same subset of genes.</li>
+        <li>Distinguishing broad functional enrichment from enrichment driven by a small number of highly connected genes.</li>
+      </ul>
+      <p>Node size for gene circles scales with degree (number of connected terms). You can drag nodes, scroll to zoom, toggle gene labels, and download the full network as a TSV.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      How do I download my results?
+    </button>
+    <div class="faq-a">
+      <p>Each results panel offers several download options:</p>
+      <ul>
+        <li><strong>Download TSV:</strong> Downloads all significant terms for the current category as a tab-separated file, including term label, name, hit count, raw p-value, adjusted p-value, enrichment direction, and the list of contributing gene models.</li>
+        <li><strong>Download All PNGs:</strong> Exports all visible charts as PNG images.</li>
+        <li><strong>SVG download:</strong> Available for the bar chart and dot plot tabs for publication-quality vector graphics.</li>
+        <li><strong>CNET TSV:</strong> Downloads the node–edge table of the concept network for use in external network tools such as Cytoscape.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      I get no significant results — what should I check?
+    </button>
+    <div class="faq-a">
+      <p>A few common reasons for empty results:</p>
+      <ul>
+        <li><strong>Gene list too small:</strong> Very few genes reduces statistical power. Try relaxing your upstream filtering criteria.</li>
+        <li><strong>Background too narrow:</strong> If your custom background is small, many terms may not have enough genes to test. Consider using the full genome background.</li>
+        <li><strong>P-value threshold too strict:</strong> Try raising the threshold from 0.05 to 0.1, or switching from Bonferroni to BH correction.</li>
+        <li><strong>Wrong genotype:</strong> Make sure the gene model IDs match the selected page. Use the <strong>Load Genes</strong> button to verify detection.</li>
+        <li><strong>Sparse annotation:</strong> Some NAM lines have less complete functional annotation than B73. If possible, try the B73 Enrichment page with orthologous B73 gene IDs.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────── TECHNICAL ──────────────────────────────── -->
+  <h2 class="faq-section-title">Technical</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      Is my data stored or shared?
+    </button>
+    <div class="faq-a">
+      <p>FETA does not persistently store gene lists or results. All computation is performed server-side at the time of submission and results are returned directly to your browser session. No gene list data is retained after the session ends or shared with third parties.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      Can I run FETA locally or access it programmatically?
+    </button>
+    <div class="faq-a">
+      <p>FETA is built on a Python/Flask backend and can be run locally if you have access to the annotation data files. The source code and data file format specifications are available on request. There is currently no public REST API, but batch analysis via the command-line Flask routes is possible for users hosting their own instance.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What browsers are supported?
+    </button>
+    <div class="faq-a">
+      <p>FETA is tested and supported on current versions of <strong>Chrome</strong>, <strong>Firefox</strong>, and <strong>Safari</strong>. The interactive CNET network and cell diagram visualisations require JavaScript to be enabled. Internet Explorer is not supported.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      I found a bug or have a feature request — how do I report it?
+    </button>
+    <div class="faq-a">
+      <p>Please contact the development team via email or open an issue on the project repository. When reporting a bug, it helps to include your browser version, the gene list you used, and a screenshot of the unexpected behaviour.</p>
+    </div>
+  </div>
+
+</div><!-- end .faq-body -->
+
+<footer>
+  FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Maize Genetics &amp; Genomics
+</footer>
+
+<script>
+  function toggle(btn) {
+    const item = btn.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

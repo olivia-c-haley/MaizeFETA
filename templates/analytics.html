@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FETA — Other Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    :root {
+      /* ── Pulled directly from the FETA logo ── */
+      --ink: #1c1c14;
+      --paper: #f4f2eb;
+      --cream: #f0ead8;       /* logo FETA lettering ivory */
+      --gold: #e8b84b;        /* logo gold/yellow track */
+      --gold-dark: #c49428;
+      --peach: #e8a882;       /* logo salmon/peach track */
+      --peach-pale: #f5ddd0;
+      --sky: #89c4d4;         /* logo sky-blue track & icons */
+      --sky-pale: #d8eff5;
+      --sky-dark: #4a9ab0;
+      --green: #407F3D;       /* logo background green */
+      --green-dark: #2e5c2c;
+      --green-light: #5a9e57;
+      --green-pale: #d6ecd5;
+      --red-soft: #d47800;
+      --border: #d4cebc;
+      --shadow: rgba(45, 92, 44, 0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background-color: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .nav-brand-logo {
+      height: 32px;
+      width: auto;
+    }
+    .nav-brand-text {
+      font-family: 'Instrument Sans', sans-serif;
+      color: var(--cream);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+      line-height: 1.3;
+    }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-links a.active { background: var(--sky-dark); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, #407F3D 100%);
+      padding: 3.5rem 2.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 em { color: var(--gold); font-style: italic; }
+    .hero-sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── LAYOUT ── */
+    .page-body {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 160px);
+    }
+
+    /* ── SIDEBAR (FORM) ── */
+    .sidebar {
+      background: var(--cream);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.75rem;
+      overflow-y: auto;
+    }
+
+    .step-block { margin-bottom: 1.75rem; }
+    .step-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .step-num {
+      width: 24px; height: 24px;
+      background: var(--sky-dark);
+      color: #fff;
+      border-radius: 50%;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green-dark);
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      line-height: 1.6;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(74,124,94,0.12);
+    }
+    .gene-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.4rem;
+      margin-bottom: 0.2rem;
+    }
+    .example-link {
+      font-size: 0.78rem;
+      color: var(--sky-dark);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .example-link:hover { text-decoration: underline; }
+    .load-genes-btn {
+      width: 100%; margin-top: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      background: var(--green-pale); border: 1.5px solid var(--green);
+      border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      color: var(--green-dark); cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .load-genes-btn:hover { background: var(--green); color: #fff; }
+    .load-genes-result {
+      margin-top: 0.4rem; padding: 0.6rem 0.8rem;
+      background: #fffbf0; border: 1px solid #e8c84a;
+      border-radius: 8px; font-size: 0.8rem; line-height: 1.6;
+      max-height: 180px; overflow-y: auto;
+    }
+    .load-genes-result.ok { background: #f0faf4; border-color: var(--green); }
+    .load-genes-result.err { background: #fff5f5; border-color: #e74c3c; }
+    .lge-not-found { color: #d47800; font-weight: 600; }
+    .gene-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: #888;
+    }
+
+    /* ontology rows */
+    .ontology-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.55rem;
+    }
+    .ontology-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+    input[type="checkbox"] {
+      accent-color: var(--sky-dark);
+      width: 15px; height: 15px;
+      cursor: pointer;
+    }
+    select {
+      flex: 1;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.8rem;
+      color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif;
+      cursor: pointer;
+      transition: border-color 0.2s, opacity 0.2s;
+    }
+    select:disabled { opacity: 0.4; cursor: default; background: #f0ede6; }
+    select:not(:disabled):focus { outline: none; border-color: var(--green-light); }
+
+    /* pvalue row */
+    .pvalue-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .radio-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    input[type="radio"] { accent-color: var(--sky-dark); cursor: pointer; }
+
+    .pvalue-select-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.65rem;
+    }
+    .pvalue-select-row label { font-size: 0.82rem; white-space: nowrap; }
+    .pvalue-select-row select { max-width: 100px; }
+
+    /* submit */
+    .run-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--green);
+      color: #fff;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .run-btn:hover { background: var(--green-dark); }
+    .run-btn:active { transform: scale(0.98); }
+    .run-btn:disabled { background: #aaa; cursor: default; }
+    .run-btn .btn-icon { font-size: 1.1rem; }
+
+    .warning-msg {
+      color: var(--red-soft);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .warning-msg.show { display: block; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+
+    /* ── RESULTS PANEL ── */
+    .results-panel {
+      padding: 2rem 2.25rem;
+      overflow-y: auto;
+    }
+    .results-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60%;
+      gap: 1rem;
+      color: #aaa;
+      text-align: center;
+    }
+    .results-placeholder .big-icon { font-size: 3.5rem; opacity: 0.3; }
+    .results-placeholder p { font-size: 0.9rem; max-width: 280px; line-height: 1.6; }
+
+    /* ── TABS ── */
+    .tabs-wrapper { margin-bottom: 1rem; }
+    .tab-bar {
+      display: flex;
+      gap: 0.3rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      color: #888;
+      transition: color 0.2s, background 0.2s;
+      position: relative;
+      bottom: -2px;
+    }
+    .tab-btn:hover { color: var(--green); background: var(--green-pale); }
+    .tab-btn.active {
+      color: var(--green-dark);
+      background: var(--paper);
+      border-color: var(--border);
+      border-bottom-color: var(--paper);
+    }    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 420px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 900px;
+      font-size: 0.8rem;
+    }
+    thead tr { background: var(--green); }
+    thead th {
+      padding: 0.65rem 0.9rem;
+      text-align: left;
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--sky-pale); }
+    tbody td {
+      padding: 0.6rem 0.9rem;
+      white-space: nowrap;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+    }
+    tbody td:nth-child(2) {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.8rem;
+      white-space: normal;
+      max-width: 260px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+    }
+    .badge-over { background: var(--green-pale); color: var(--green-dark); }
+    .badge-under { background: var(--peach-pale); color: #7a4000; }
+
+    /* ── CHART AREA ── */
+    .chart-section {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .chart-title {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--green-dark);
+    }
+    .chart-actions { display: flex; gap: 0.5rem; }
+    .dl-btn {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      font-family: 'Instrument Sans', sans-serif;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .dl-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
+    .chart-canvas-wrap { position: relative; max-height: 420px; }
+
+    /* ── RESULTS ACTIONS ── */
+    .results-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      padding: 0.45rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      font-family: 'Instrument Sans', sans-serif;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .action-btn:hover { background: var(--cream); }
+    .action-btn.primary {
+      background: var(--gold);
+      border-color: var(--gold-dark);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .action-btn.primary:hover { background: var(--gold-dark); color: #fff; }
+
+    /* Loading */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      gap: 1rem;
+      color: var(--green);
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--green-pale);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* No results */
+    .no-results {
+      padding: 2.5rem 1rem;
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    /* ── FIGURE SWITCHER ── */
+    .fig-switcher {
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.3rem;
+      width: fit-content;
+    }
+    .fig-btn {
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #777;
+      transition: background 0.18s, color 0.18s;
+    }
+    .fig-btn:hover { color: var(--green-dark); }
+    .fig-btn.active { background: var(--sky-dark); color: #fff; }
+
+    .fig-panel { display: none; }
+    .fig-panel.active { display: block; }
+
+    /* emap SVG styles */
+    .emap-wrap {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .emap-wrap svg { display: block; width: 100% !important; height: auto !important; }
+    .emap-node circle { stroke-width: 2; cursor: pointer; transition: opacity 0.2s; }
+    .emap-node circle:hover { opacity: 0.8; }
+    .emap-node text { pointer-events: none; font-family: 'Instrument Sans', sans-serif; }
+    .emap-link { stroke: #bbb; stroke-opacity: 0.6; fill: none; }
+
+    /* dotplot */
+    .dotplot-wrap {
+      width: fit-content;
+      max-width: 100%;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+    .dotplot-wrap svg { display: block; }
+
+    /* ggPlantmap multi-panel */
+    .gpm-view-switcher {
+      display: flex; gap: 0.35rem; margin-bottom: 0.75rem;
+    }
+    .gpm-view-btn {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.75rem; font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: var(--cream); border: 1px solid var(--border);
+      border-radius: 6px; cursor: pointer; color: #666;
+      transition: background 0.15s, color 0.15s;
+    }
+    .gpm-view-btn:hover { background: var(--green-pale); color: var(--green-dark); }
+    .gpm-view-btn.active { background: var(--sky-dark); border-color: var(--sky-dark); color: #fff; }
+    .gpm-panels {
+      display: flex; gap: 1rem; align-items: flex-start; width: 100%;
+    }
+    .gpm-sam, .gpm-leaf {
+      flex: 1 1 0; min-width: 0;
+    }
+    .gpm-sam svg, .gpm-leaf svg {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+    }
+    /* when only one panel visible, let it fill full width */
+    .gpm-panels:has(.gpm-sam[style*="display: none"]) .gpm-leaf,
+    .gpm-panels:has(.gpm-leaf[style*="display: none"]) .gpm-sam {
+      flex: 1 1 100%;
+    }
+
+    /* legend */
+    .chart-legend {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: #555;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-bar {
+      width: 18px; height: 10px; border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .cnet-toggle-btn {
+      padding: 0.25rem 0.65rem;
+      font-size: 0.72rem; font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: var(--green-pale); border: 1px solid var(--green);
+      border-radius: 6px; cursor: pointer; color: var(--green-dark);
+      transition: background 0.15s, color 0.15s;
+    }
+    .cnet-toggle-btn:hover { background: var(--green); color: #fff; }
+    .cnet-toggle-btn.off { background: var(--cream); border-color: var(--border); color: #aaa; }
+    /* ── GENE PILLS ── */
+    .gene-pills { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+    .gene-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      background: var(--green-pale);
+      color: var(--green-dark);
+      border-radius: 4px;
+      padding: 1px 5px;
+      white-space: nowrap;
+    }
+    .gene-pill-more {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--sky-dark);
+      cursor: pointer;
+      padding: 1px 5px;
+      border: 1px solid var(--sky-dark);
+      border-radius: 4px;
+      background: none;
+      white-space: nowrap;
+    }
+    .gene-pill-more:hover { background: var(--sky-pale); }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-4px); }
+      40%,80% { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.35s ease; border-color: var(--red-soft) !important; box-shadow: 0 0 0 3px rgba(212,120,0,0.15) !important; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-body { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 1.5rem;
+      padding: 0 1.5rem;
+    }
+    .tab-btn {
+      padding: 0.65rem 1.25rem;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #888;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--green-dark); }
+    .tab-btn.active {
+      color: var(--green-dark);
+      border-bottom-color: var(--green-dark);
+    }
+    .tab-content { padding: 0 1.5rem 1.5rem; }
+
+    /* ── PSAURON stacked layout ── */
+    .psauron-chart-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .psauron-chart-inner {
+      width: 100%;
+      max-width: 620px;
+    }
+    .psauron-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .psauron-bottom { grid-template-columns: 1fr; } }
+    .psauron-right-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── ANALYTICS PAGE ── */
+    .psauron-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) { .psauron-grid { grid-template-columns: 1fr; } }
+    .stat-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+    .stat-card-title {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--green-dark);
+      margin-bottom: 0.85rem;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.85rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: #666; line-height: 1.4; font-size: 0.85rem; }
+    .stat-val {
+      font-family: 'DM Mono', monospace;
+      font-weight: 600;
+      color: var(--ink);
+      text-align: right;
+      line-height: 1.4;
+      font-size: 0.85rem;
+    }
+    .stat-val.sig { color: var(--green-dark); }
+    .stat-val.ns  { color: #999; }
+    .kde-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .kde-legend {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .kde-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .kde-swatch { width: 22px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+    .analysis-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .analysis-card:hover { border-color: var(--sky-dark); background: var(--sky-pale); }
+    .analysis-card.selected { border-color: var(--sky-dark); background: var(--sky-pale); }
+    .analysis-card label {
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+    /* ── Genotype detection status ── */
+    .genotype-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 7px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--sky-pale);
+      border: 1px solid var(--sky-dark);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .genotype-status.success {
+      background: var(--green-pale);
+      border-color: var(--green);
+      color: var(--green-dark);
+    }
+    .genotype-status.error {
+      background: #fdecea;
+      border-color: var(--red-soft);
+      color: var(--red-soft);
+    }
+    .genotype-status.checking {
+      background: var(--sky-pale);
+      border-color: var(--sky-dark);
+      color: var(--sky-dark);
+    }
+    .genotype-status-icon { font-size: 1rem; flex-shrink: 0; }
+
+    .analysis-card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .analysis-card-desc {
+      font-size: 0.82rem;
+      color: #777;
+      margin-top: 0.2rem;
+      line-height: 1.4;
+    }
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <img class="nav-brand-logo"
+         src="{{ url_for('static', filename='images/feta_banner.png') }}"
+         alt="FETA">
+    
+  </div>
+  <div class="nav-links">
+    <a href="/">B73 Enrichment</a>
+    <a href="/nonb73">Non-B73 Enrichment</a>
+    <a href="/analytics" class="active">Other Analytics</a>
+    <a href="/data-sources">Data Sources</a>
+    <a href="/faq">FAQ</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Maize Genomics Tool</div>
+    <h1>Other<br><em>Analytics</em></h1>
+    <p class="hero-sub">Explore gene-level properties of your maize gene sets beyond functional enrichment.</p>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <form id="analytics-form">
+
+      <!-- Step 1 -->
+      <div class="step-block">
+        <div class="step-label">
+          <div class="step-num">1</div>
+          <span class="step-title">Paste your gene list</span>
+        </div>
+        <textarea id="genes" name="genes" placeholder="Zm00001eb428070&#10;Zm00001eb398970&#10;...one gene per line"></textarea>
+        <button type="button" class="load-genes-btn" id="load-genes-btn">Load Genes</button>
+        <div id="load-genes-result" class="load-genes-result" style="display:none;"></div>
+        <div class="gene-meta">
+          <a href="#" class="example-link" id="example-link">&#8599; Load example list</a>
+          <span class="gene-count" id="gene-count">0 genes</span>
+        </div>
+        <!-- Genotype detection status -->
+        <div class="genotype-status" id="genotype-status" style="display:none;">
+          <span class="genotype-status-icon" id="genotype-status-icon"></span>
+          <span class="genotype-status-text" id="genotype-status-text"></span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Step 2 -->
+      <div class="step-block">
+        <div class="step-label">
+          <div class="step-num">2</div>
+          <span class="step-title">Select analysis</span>
+        </div>
+
+        <div class="analysis-card" id="card-psauron">
+          <label>
+            <input type="checkbox" id="cb-psauron" name="analysis" value="psauron"
+                   style="accent-color:var(--sky-dark);width:15px;height:15px;cursor:pointer;flex-shrink:0;margin-top:2px;">
+            <div>
+              <div class="analysis-card-title">PSAURON Classification</div>
+              <div class="analysis-card-desc">KDE score distribution of your genes vs. the background population, plus Mann-Whitney U, KS, and Chi-squared statistical tests.</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="analysis-card" id="card-phylostratr">
+          <label>
+            <input type="checkbox" id="cb-phylostratr" name="analysis" value="phylostratr"
+                   style="accent-color:var(--sky-dark);width:15px;height:15px;cursor:pointer;flex-shrink:0;margin-top:2px;">
+            <div>
+              <div class="analysis-card-title">Phylostratr Classification</div>
+              <div class="analysis-card-desc">Distribution of genes across evolutionary strata compared to the background population, with Chi-squared enrichment test.</div>
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <hr class="divider">
+
+      <!-- Step 3 -->
+      <button class="run-btn" type="submit" id="run-btn" style="background:var(--sky-dark);">
+        Run Analytics
+      </button>
+      <p class="warning-msg" id="warning-msg">&#9888; Please select at least one analysis.</p>
+
+    </form>
+  </aside>
+
+  <!-- ── RESULTS PANEL ── -->
+  <main class="results-panel" id="results-panel">
+    <div class="results-placeholder" id="placeholder">
+      <div class="big-icon">🔬</div>
+      <p>Select an analysis and submit your gene list to get started.</p>
+    </div>
+    <!-- Tab bar — hidden until results load -->
+    <div class="tab-bar" id="tab-bar" style="display:none;">
+      <button class="tab-btn active" id="tab-psauron"     onclick="switchTab('psauron')">PSAURON</button>
+      <button class="tab-btn"        id="tab-phylostratr" onclick="switchTab('phylostratr')">Phylostratr</button>
+    </div>
+    <div id="tab-content-psauron"     class="tab-content" style="display:none;"></div>
+    <div id="tab-content-phylostratr" class="tab-content" style="display:none;"></div>
+  </main>
+
+</div>
+
+<script>
+const exampleGenes = [
+  "Zm00001eb428070","Zm00001eb398970","Zm00001eb078870","Zm00001eb128310","Zm00001eb251960",
+  "Zm00001eb155660","Zm00001eb073680","Zm00001eb058130","Zm00001eb018720","Zm00001eb296060",
+  "Zm00001eb360030","Zm00001eb012040","Zm00001eb335710","Zm00001eb391720","Zm00001eb253150",
+  "Zm00001eb107190","Zm00001eb143060","Zm00001eb228080","Zm00001eb060840","Zm00001eb060890"
+];
+
+const genesArea = document.getElementById("genes");
+const geneCount = document.getElementById("gene-count");
+
+genesArea.addEventListener("input", () => {
+  updateGeneCount();
+  resetGenotypeStatus();
+});
+
+function updateGeneCount() {
+  const lines = genesArea.value.trim().split("\n").filter(g => g.trim());
+  geneCount.textContent = `${lines.length} gene${lines.length !== 1 ? 's' : ''}`;
+}
+
+document.getElementById("example-link").addEventListener("click", e => {
+  e.preventDefault();
+  genesArea.value = exampleGenes.join("\n");
+  updateGeneCount();
+  resetGenotypeStatus();
+});
+
+// Toggle card selected state visually
+document.getElementById("cb-psauron").addEventListener("change", function() {
+  document.getElementById("card-psauron").classList.toggle("selected", this.checked);
+});
+document.getElementById("cb-phylostratr").addEventListener("change", function() {
+  document.getElementById("card-phylostratr").classList.toggle("selected", this.checked);
+});
+
+/* ── Genotype status helpers ── */
+function setGenotypeStatus(state, icon, text) {
+  const el   = document.getElementById("genotype-status");
+  const ico  = document.getElementById("genotype-status-icon");
+  const txt  = document.getElementById("genotype-status-text");
+  el.style.display = "flex";
+  el.className = `genotype-status ${state}`;
+  ico.textContent = icon;
+  txt.textContent = text;
+}
+
+function resetGenotypeStatus() {
+  const el = document.getElementById("genotype-status");
+  el.style.display = "none";
+  el.className = "genotype-status";
+}
+
+/* ── FORM SUBMIT — Step 1: detect genotype, Step 2: run analyses ── */
+document.getElementById("analytics-form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const genes = genesArea.value.trim().split("\n").filter(g => g.trim());
+  if (!genes.length) {
+    genesArea.classList.add("shake");
+    setTimeout(() => genesArea.classList.remove("shake"), 400);
+    return;
+  }
+
+  const psauronChecked     = document.getElementById("cb-psauron").checked;
+  const phylostratrChecked = document.getElementById("cb-phylostratr").checked;
+  const warn = document.getElementById("warning-msg");
+  if (!psauronChecked && !phylostratrChecked) { warn.classList.add("show"); return; }
+  warn.classList.remove("show");
+
+  const btn = document.getElementById("run-btn");
+  btn.disabled = true;
+
+  const formData = new FormData();
+  formData.append("genes", genes.join("\n"));
+
+  // ── Step 1: detect genotype ──
+  setGenotypeStatus("checking",
+    '<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;"></span>',
+    "Checking for genotype…");
+
+  let genotype = null;
+  try {
+    const detectResp = await fetch("/detect_genotype", { method: "POST", body: formData });
+    const detectData = await detectResp.json();
+    if (detectData.error) {
+      setGenotypeStatus("error", "✗", "Error — verify the input gene models.");
+      btn.disabled = false;
+      return;
+    }
+    genotype = detectData.genotype;
+    setGenotypeStatus("success", "✓", `${genotype} detected`);
+  } catch (err) {
+    setGenotypeStatus("error", "✗", "Error — verify the input gene models.");
+    btn.disabled = false;
+    return;
+  }
+
+  // ── Step 2: run selected analyses ──
+  // Show loading in results panel
+  document.getElementById("placeholder").style.display = "none";
+  document.getElementById("tab-bar").style.display = "none";
+  document.getElementById("tab-content-psauron").style.display     = "none";
+  document.getElementById("tab-content-phylostratr").style.display = "none";
+
+  const panel = document.getElementById("results-panel");
+  const loader = document.createElement("div");
+  loader.id = "results-loader";
+  loader.className = "loading-state";
+  loader.innerHTML = `<div class="spinner"></div><p style="font-size:0.9rem;color:var(--sky-dark)">Running analytics for <strong>${genotype}</strong>…</p>`;
+  panel.appendChild(loader);
+
+  try {
+    const fetches = {};
+    if (psauronChecked)     fetches.psauron     = fetch("/psauron",     { method: "POST", body: formData });
+    if (phylostratrChecked) fetches.phylostratr = fetch("/phylostratr", { method: "POST", body: formData });
+
+    const results = {};
+    for (const [key, promise] of Object.entries(fetches)) {
+      const resp = await promise;
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        results[key] = { error: errData.error || `Server error (${resp.status})` };
+      } else {
+        results[key] = await resp.json();
+      }
+    }
+
+    loader.remove();
+    btn.disabled = false;
+    renderAnalyticsResults(results, psauronChecked, phylostratrChecked);
+  } catch (err) {
+    loader.remove();
+    btn.disabled = false;
+    document.getElementById("placeholder").innerHTML =
+      `<p style="color:var(--red-soft);">Network error: ${err.message}</p>`;
+    document.getElementById("placeholder").style.display = "block";
+  }
+});
+
+/* ── Tab switching ── */
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+  document.getElementById(`tab-${name}`).classList.add("active");
+  document.getElementById(`tab-content-${name}`).style.display = "block";
+}
+
+/* ── RENDER ── */
+function renderAnalyticsResults(results, psauronChecked, phylostratrChecked) {
+  const tabBar = document.getElementById("tab-bar");
+
+  // Show only tabs for analyses that ran
+  document.getElementById("tab-psauron").style.display     = psauronChecked     ? "" : "none";
+  document.getElementById("tab-phylostratr").style.display = phylostratrChecked ? "" : "none";
+
+  if (results.psauron) {
+    const container = document.getElementById("tab-content-psauron");
+    container.innerHTML = "";
+    if (results.psauron.error) {
+      container.innerHTML = `<p style="color:var(--red-soft);padding:1rem;">${results.psauron.error}</p>`;
+    } else {
+      renderPsauron(results.psauron, container);
+    }
+  }
+
+  if (results.phylostratr) {
+    const container = document.getElementById("tab-content-phylostratr");
+    container.innerHTML = "";
+    if (results.phylostratr.error) {
+      container.innerHTML = `<p style="color:var(--red-soft);padding:1rem;">${results.phylostratr.error}</p>`;
+    } else {
+      renderPhylostratr(results.phylostratr, container);
+    }
+  }
+
+  // Show tab bar and activate first visible tab
+  tabBar.style.display = "flex";
+  if (psauronChecked)          switchTab("psauron");
+  else if (phylostratrChecked) switchTab("phylostratr");
+}
+
+/* ── KDE helpers ── */
+function silverman(data) {
+  const n = data.length;
+  const mean = data.reduce((a, b) => a + b, 0) / n;
+  const std  = Math.sqrt(data.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
+  return 1.06 * std * Math.pow(n, -0.2);
+}
+
+function kdePoints(data, bw, xPts) {
+  return xPts.map(x => {
+    let d = 0;
+    for (const v of data) {
+      const u = (x - v) / bw;
+      d += Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI);
+    }
+    return d / (data.length * bw);
+  });
+}
+
+/* ── PSAURON render ── */
+function renderPsauron(data, panel) {
+  const section = document.createElement("div");
+  section.className = "chart-section";
+
+  section.innerHTML = `
+    <div class="chart-header">
+      <div class="chart-title">PSAURON Classification — ${data.genotype} Genome</div>
+      <div class="chart-actions">
+        <button class="dl-btn" id="dl-kde-png">⬇ PNG</button>
+        <button class="dl-btn" id="dl-kde-svg">⬇ SVG</button>
+        <button class="dl-btn" id="dl-stats-tsv">⬇ TSV</button>
+      </div>
+    </div>
+
+    <!-- TOP: chart centred -->
+    <div class="psauron-chart-wrap">
+      <div class="psauron-chart-inner">
+        <div class="kde-wrap">
+          <div class="stat-card-title">Score Distribution — Query vs Whole Genome</div>
+          <canvas id="psauron-kde-canvas"></canvas>
+          <div class="kde-legend" id="kde-legend-el">
+            <div class="kde-legend-item">
+              <div class="kde-swatch" style="background:rgba(61,122,58,0.85)"></div>
+              <span>Whole Genome (n=${data.pop_n.toLocaleString()})</span>
+            </div>
+            <div class="kde-legend-item">
+              <div class="kde-swatch" style="background:rgba(232,184,75,0.95)"></div>
+              <span>Query (n=${data.query_n.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: stat cards side by side -->
+    <div class="psauron-bottom">
+      <div class="stat-card">
+        <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Score Summary</div>
+        <div class="stat-row"><span class="stat-label">Query mean</span><span class="stat-val">${data.stats.query_mean.toFixed(4)}</span></div>
+        <div class="stat-row"><span class="stat-label">Population mean</span><span class="stat-val">${data.stats.pop_mean.toFixed(4)}</span></div>
+        <div class="stat-row"><span class="stat-label">Query median</span><span class="stat-val">${data.stats.query_median.toFixed(4)}</span></div>
+        <div class="stat-row"><span class="stat-label">Population median</span><span class="stat-val">${data.stats.pop_median.toFixed(4)}</span></div>
+        <div class="stat-row"><span class="stat-label">Query % TRUE</span><span class="stat-val">${(data.stats.query_true_pct * 100).toFixed(1)}%</span></div>
+        <div class="stat-row"><span class="stat-label">Population % TRUE</span><span class="stat-val">${(data.stats.pop_true_pct * 100).toFixed(1)}%</span></div>
+        <div class="stat-row"><span class="stat-label">Direction</span>
+          <span class="stat-val">${data.stats.query_mean > data.stats.pop_mean ? "↑ higher than pop." : "↓ lower than pop."}</span></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Statistical Tests</div>
+        ${makeTestRow("Mann-Whitney U", "Are query scores shifted?", data.stats.mw_pvalue)}
+        ${makeTestRow("Kolmogorov-Smirnov", "Do distributions differ?", data.stats.ks_pvalue)}
+        ${makeTestRow("Chi-squared", "TRUE/FALSE enrichment", data.stats.chi2_pvalue)}
+      </div>
+    </div>`;
+
+  panel.appendChild(section);
+
+  // ── Draw KDE chart ──
+  const ctx = document.getElementById("psauron-kde-canvas").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.x_grid.map(x => x.toFixed(3)),
+      datasets: [
+        {
+          label: "Population",
+          data: data.pop_kde_y,
+          borderColor: "rgba(61,122,58,0.85)",
+          backgroundColor: "rgba(61,122,58,0.12)",
+          borderWidth: 2, fill: true, pointRadius: 0, tension: 0.4,
+        },
+        {
+          label: "Query",
+          data: data.query_kde_y,
+          borderColor: "rgba(232,184,75,0.95)",
+          backgroundColor: "rgba(232,184,75,0.2)",
+          borderWidth: 2.5, fill: true, pointRadius: 0, tension: 0.4,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          bodyFont: { size: 12 }, titleFont: { size: 13 },
+          callbacks: {
+            title: items => `Score: ${parseFloat(items[0].label).toFixed(3)}`,
+            label: item => `${item.dataset.label}: ${item.raw.toFixed(5)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: 11,
+            callback: (_, i) => data.x_grid[i] !== undefined ? data.x_grid[i].toFixed(1) : "",
+            font: { family: "'DM Mono', monospace", size: 12 }
+          },
+          title: { display: true, text: "PSAURON Score", font: { family: "'Instrument Sans', sans-serif", size: 13 } }
+        },
+        y: {
+          title: { display: true, text: "Density", font: { family: "'Instrument Sans', sans-serif", size: 13 } },
+          ticks: { font: { family: "'DM Mono', monospace", size: 12 } }
+        }
+      }
+    }
+  });
+
+  // ── Download PNG — composite chart + legend onto an offscreen canvas ──
+  document.getElementById("dl-kde-png").addEventListener("click", () => {
+    const chartCanvas = document.getElementById("psauron-kde-canvas");
+    const cw = chartCanvas.width;
+    const ch = chartCanvas.height;
+
+    // Legend config
+    const legendItems = [
+      { color: "rgba(61,122,58,0.85)",  label: `Whole Genome (n=${data.pop_n.toLocaleString()})` },
+      { color: "rgba(232,184,75,0.95)", label: `Query (n=${data.query_n.toLocaleString()})` },
+    ];
+    const legPad = 16, swatchW = 22, swatchH = 4, gap = 8, fontSize = 13;
+    const legRowH = 22;
+    const legH = legPad * 2 + legendItems.length * legRowH;
+
+    const out = document.createElement("canvas");
+    out.width  = cw;
+    out.height = ch + legH;
+    const octx = out.getContext("2d");
+
+    // White background
+    octx.fillStyle = "#ffffff";
+    octx.fillRect(0, 0, out.width, out.height);
+
+    // Chart
+    octx.drawImage(chartCanvas, 0, 0);
+
+    // Legend below chart
+    octx.font = `${fontSize}px 'Instrument Sans', sans-serif`;
+    octx.textBaseline = "middle";
+    let lx = legPad;
+    const ly0 = ch + legPad;
+    legendItems.forEach((item, i) => {
+      const ly = ly0 + i * legRowH + legRowH / 2;
+      // Swatch (line)
+      octx.strokeStyle = item.color;
+      octx.fillStyle   = item.color;
+      octx.lineWidth   = 3;
+      const swatchY = ly;
+      octx.beginPath();
+      octx.moveTo(lx, swatchY);
+      octx.lineTo(lx + swatchW, swatchY);
+      octx.stroke();
+      // Label
+      octx.fillStyle = "#333";
+      octx.fillText(item.label, lx + swatchW + gap, ly);
+    });
+
+    const a = document.createElement("a");
+    a.href = out.toDataURL("image/png");
+    a.download = `psauron_kde_${data.genotype}.png`;
+    a.click();
+  });
+
+  // ── Download SVG (PSAURON KDE) ──
+  document.getElementById("dl-kde-svg").addEventListener("click", () => {
+    const chartCanvas = document.getElementById("psauron-kde-canvas");
+    const W = chartCanvas.width, H = chartCanvas.height;
+    const pad = { top: 30, right: 20, bottom: 50, left: 55 };
+    const plotW = W - pad.left - pad.right;
+    const plotH = H - pad.top  - pad.bottom;
+
+    const xMin = Math.min(...data.x_grid), xMax = Math.max(...data.x_grid);
+    const allY = [...data.pop_kde_y, ...data.query_kde_y];
+    const yMax = Math.max(...allY) * 1.08;
+
+    const px = v => pad.left + (v - xMin) / (xMax - xMin) * plotW;
+    const py = v => pad.top  + plotH - (v / yMax) * plotH;
+
+    const lineData = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${px(data.x_grid[i]).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
+    const areaData = (arr) => lineData(arr) + ` L${px(xMax).toFixed(1)},${py(0).toFixed(1)} L${px(xMin).toFixed(1)},${py(0).toFixed(1)} Z`;
+
+    const nTicks = 11;
+    const tickStep = (xMax - xMin) / (nTicks - 1);
+    const xTicks = Array.from({length: nTicks}, (_, i) => xMin + i * tickStep);
+    const yTickCount = 5;
+    const yTicks = Array.from({length: yTickCount + 1}, (_, i) => i * yMax / yTickCount);
+
+    const legItems = [
+      { color: "rgba(61,122,58,0.85)",  label: `Whole Genome (n=${data.pop_n.toLocaleString()})` },
+      { color: "rgba(232,184,75,0.95)", label: `Query (n=${data.query_n.toLocaleString()})` },
+    ];
+    const legY = pad.top + plotH + 44;
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + 50}" font-family="Arial, sans-serif">
+  <rect width="${W}" height="${H + 50}" fill="white"/>
+  <defs><clipPath id="plot-clip"><rect x="${pad.left}" y="${pad.top}" width="${plotW}" height="${plotH}"/></clipPath></defs>
+  ${yTicks.map(v => `<line x1="${pad.left}" y1="${py(v).toFixed(1)}" x2="${pad.left+plotW}" y2="${py(v).toFixed(1)}" stroke="#e8e4da" stroke-dasharray="3,3"/>`).join("\n  ")}
+  <path d="${areaData(data.pop_kde_y)}"   fill="rgba(61,122,58,0.12)"  clip-path="url(#plot-clip)"/>
+  <path d="${areaData(data.query_kde_y)}" fill="rgba(232,184,75,0.20)" clip-path="url(#plot-clip)"/>
+  <path d="${lineData(data.pop_kde_y)}"   fill="none" stroke="rgba(61,122,58,0.85)"  stroke-width="2"   clip-path="url(#plot-clip)"/>
+  <path d="${lineData(data.query_kde_y)}" fill="none" stroke="rgba(232,184,75,0.95)" stroke-width="2.5" clip-path="url(#plot-clip)"/>
+  <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+plotH}" stroke="#ccc"/>
+  <line x1="${pad.left}" y1="${pad.top+plotH}" x2="${pad.left+plotW}" y2="${pad.top+plotH}" stroke="#ccc"/>
+  ${xTicks.map(v => `<line x1="${px(v).toFixed(1)}" y1="${pad.top+plotH}" x2="${px(v).toFixed(1)}" y2="${pad.top+plotH+4}" stroke="#999"/>
+  <text x="${px(v).toFixed(1)}" y="${pad.top+plotH+16}" text-anchor="middle" font-size="11" fill="#555">${v.toFixed(1)}</text>`).join("\n  ")}
+  ${yTicks.map(v => `<line x1="${pad.left-4}" y1="${py(v).toFixed(1)}" x2="${pad.left}" y2="${py(v).toFixed(1)}" stroke="#999"/>
+  <text x="${pad.left-8}" y="${py(v).toFixed(1)}" dominant-baseline="middle" text-anchor="end" font-size="11" fill="#555">${v.toFixed(2)}</text>`).join("\n  ")}
+  <text x="${pad.left + plotW/2}" y="${pad.top+plotH+34}" text-anchor="middle" font-size="13" fill="#444">PSAURON Score</text>
+  <text x="${-(pad.top+plotH/2)}" y="14" transform="rotate(-90)" text-anchor="middle" font-size="13" fill="#444">Density</text>
+  ${legItems.map((it, i) => `<line x1="${pad.left + i*170}" y1="${legY}" x2="${pad.left + i*170 + 22}" y2="${legY}" stroke="${it.color}" stroke-width="3"/>
+  <text x="${pad.left + i*170 + 28}" y="${legY}" dominant-baseline="middle" font-size="12" fill="#333">${it.label}</text>`).join("\n  ")}
+</svg>`;
+
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `psauron_kde_${data.genotype}.svg`;
+    a.click();
+  });
+
+  // ── Download TSV (PSAURON) ──
+    const s = data.stats;
+    const rows = [
+      ["Metric", "Query", "Population"],
+      ["n", data.query_n, data.pop_n],
+      ["Mean", s.query_mean.toFixed(4), s.pop_mean.toFixed(4)],
+      ["Median", s.query_median.toFixed(4), s.pop_median.toFixed(4)],
+      ["% TRUE", (s.query_true_pct*100).toFixed(1)+"%", (s.pop_true_pct*100).toFixed(1)+"%"],
+      ["", "", ""],
+      ["Test", "p-value", "Significant (p<0.05)"],
+      ["Mann-Whitney U",      s.mw_pvalue.toExponential(4),   s.mw_pvalue   < 0.05 ? "Yes" : "No"],
+      ["Kolmogorov-Smirnov",  s.ks_pvalue.toExponential(4),   s.ks_pvalue   < 0.05 ? "Yes" : "No"],
+      ["Chi-squared",         s.chi2_pvalue.toExponential(4), s.chi2_pvalue < 0.05 ? "Yes" : "No"],
+    ];
+    const tsv = rows.map(r => r.join("\t")).join("\n");
+    const blob = new Blob([tsv], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `psauron_stats_${data.genotype}.tsv`;
+    a.click();
+  });
+}
+
+function makeTestRow(name, desc, pval) {
+  const sig = pval < 0.05;
+  return `<div class="stat-row">
+    <span class="stat-label" style="font-size:0.85rem;"><strong>${name}</strong><br><small style="color:#aaa;font-size:0.75rem;">${desc}</small></span>
+    <span class="stat-val ${sig ? 'sig' : 'ns'}" style="font-size:0.85rem;">p = ${pval.toExponential(3)}<br><small style="font-size:0.75rem;">${sig ? "✓ significant" : "ns"}</small></span>
+  </div>`;
+}
+
+function makeTestTableRow(name, pval) {
+  const sig = pval < 0.05;
+  return `<tr>
+    <td style="font-family:'Instrument Sans',sans-serif;">${name}</td>
+    <td>${pval.toExponential(3)}</td>
+    <td style="color:${sig ? 'var(--green-dark)' : '#999'};font-weight:600;">${sig ? "✓ Significant" : "ns"}</td>
+  </tr>`;
+}/* ── PHYLOSTRATR render ── */
+function renderPhylostratr(data, container) {
+  const section = document.createElement("div");
+  section.className = "chart-section";
+
+  const sig = data.chi2_pvalue < 0.05;
+
+  section.innerHTML = `
+    <div class="chart-header">
+      <div class="chart-title">Phylostratr Classification — ${data.genotype} Genome</div>
+      <div class="chart-actions">
+        <button class="dl-btn" id="dl-phylo-png">⬇ PNG</button>
+        <button class="dl-btn" id="dl-phylo-svg">⬇ SVG</button>
+        <button class="dl-btn" id="dl-phylo-tsv">⬇ TSV</button>
+      </div>
+    </div>
+
+    <div class="psauron-split">
+      <!-- LEFT: bar chart -->
+      <div class="psauron-left">
+        <div class="kde-wrap">
+          <div class="stat-card-title">Stratum Distribution — Query vs Whole Genome (%)</div>
+          <canvas id="phylo-bar-canvas"></canvas>
+          <div class="kde-legend" style="margin-top:0.75rem;">
+            <div class="kde-legend-item">
+              <div class="kde-swatch" style="background:rgba(61,122,58,0.75)"></div>
+              <span>Whole Genome (n=${data.pop_total.toLocaleString()})</span>
+            </div>
+            <div class="kde-legend-item">
+              <div class="kde-swatch" style="background:rgba(232,184,75,0.9)"></div>
+              <span>Query (n=${data.query_total.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: stat cards -->
+      <div class="psauron-right">
+        <div class="stat-card">
+          <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Statistical Test</div>
+          <div class="stat-row">
+            <span class="stat-label"><strong>Chi-squared</strong><br><small style="color:#aaa;font-size:0.75rem;">Distribution differs from population?</small></span>
+            <span class="stat-val ${sig ? 'sig' : 'ns'}" style="font-size:0.85rem;">p = ${data.chi2_pvalue.toExponential(3)}<br><small style="font-size:0.75rem;">${sig ? "✓ significant" : "ns"}</small></span>
+          </div>
+        </div>
+
+        <div class="stat-card" style="margin-top:1rem;">
+          <div class="stat-card-title" style="display:flex;justify-content:space-between;align-items:baseline;">
+            <span style="border-bottom:2px solid var(--green);padding-bottom:0.3rem;">Stratum Counts</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:400;color:#888;">Your genes / Whole Genome</span>
+          </div>
+          ${data.strata.map(s => {
+            const sig  = s.adj_pvalue < 0.05;
+            const over = s.direction === "over";
+            const sigBadge = sig
+              ? `<span style="font-size:0.7rem;font-weight:700;color:${over ? 'var(--green-dark)' : 'var(--red-soft)'};">
+                   ${over ? "▲ over" : "▼ under"} p=${s.adj_pvalue.toExponential(2)}
+                 </span>`
+              : `<span style="font-size:0.7rem;color:#bbb;">ns</span>`;
+            return `
+          <div class="stat-row">
+            <span class="stat-label" style="font-size:0.78rem;">${s.name}</span>
+            <span class="stat-val" style="font-size:0.78rem;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:0.1rem;">
+              <span><span style="color:var(--green-dark);font-weight:700;">${s.query_count}</span><span style="color:#aaa;font-weight:400;"> (${s.query_pct}%)</span> / <span style="font-weight:400;">${s.pop_count} (${s.pop_pct}%)</span></span>
+              ${sigBadge}
+            </span>
+          </div>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>`;
+
+  container.appendChild(section);
+
+  // ── Draw grouped bar chart ──
+  const labels  = data.strata.map(s => s.name);
+  const popPct  = data.strata.map(s => s.pop_pct);
+  const queryPct = data.strata.map(s => s.query_pct);
+
+  const ctx = document.getElementById("phylo-bar-canvas").getContext("2d");
+  const chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Population %",
+          data: popPct,
+          backgroundColor: "rgba(61,122,58,0.65)",
+          borderColor:     "rgba(61,122,58,0.9)",
+          borderWidth: 1,
+        },
+        {
+          label: "Query %",
+          data: queryPct,
+          backgroundColor: "rgba(232,184,75,0.75)",
+          borderColor:     "rgba(232,184,75,0.95)",
+          borderWidth: 1,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          bodyFont: { size: 12 }, titleFont: { size: 12 },
+          callbacks: {
+            label: item => `${item.dataset.label}: ${item.raw.toFixed(1)}%`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            font: { family: "'Instrument Sans', sans-serif", size: 11 },
+            maxRotation: 40,
+            minRotation: 30,
+          }
+        },
+        y: {
+          title: { display: true, text: "% of genes", font: { family: "'Instrument Sans', sans-serif", size: 13 } },
+          ticks: { font: { family: "'DM Mono', monospace", size: 12 },
+                   callback: v => v + "%" }
+        }
+      }
+    }
+  });
+
+  // ── Download PNG ──
+  document.getElementById("dl-phylo-png").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = document.getElementById("phylo-bar-canvas").toDataURL("image/png");
+    a.download = `phylostratr_${data.genotype}.png`;
+    a.click();
+  });
+
+  // ── Download SVG (Phylostratr) ──
+  document.getElementById("dl-phylo-svg").addEventListener("click", () => {
+    const chartCanvas = document.getElementById("phylo-bar-canvas");
+    const W = chartCanvas.width, H = chartCanvas.height;
+    const pad = { top: 20, right: 20, bottom: 70, left: 55 };
+    const plotW = W - pad.left - pad.right;
+    const plotH = H - pad.top  - pad.bottom;
+
+    const labels  = data.strata.map(s => s.name);
+    const popPct  = data.strata.map(s => s.pop_pct);
+    const queryPct = data.strata.map(s => s.query_pct);
+    const yMax = Math.max(...popPct, ...queryPct) * 1.12;
+    const n = labels.length;
+
+    const groupW = plotW / n;
+    const barW   = groupW * 0.35;
+    const py = v => pad.top + plotH - (v / yMax) * plotH;
+
+    const yTickCount = 5;
+    const yTicks = Array.from({length: yTickCount + 1}, (_, i) => i * yMax / yTickCount);
+
+    const legItems = [
+      { color: "rgba(61,122,58,0.75)",  label: `Whole Genome (n=${data.pop_total.toLocaleString()})` },
+      { color: "rgba(232,184,75,0.9)",  label: `Query (n=${data.query_total.toLocaleString()})` },
+    ];
+    const legY = pad.top + plotH + 58;
+
+    const bars = labels.map((lbl, i) => {
+      const cx   = pad.left + i * groupW + groupW / 2;
+      const ph   = (popPct[i]   / yMax) * plotH;
+      const qh   = (queryPct[i] / yMax) * plotH;
+      const px1  = cx - barW - 1;
+      const px2  = cx + 1;
+      // x-axis label — rotate 35°
+      const lx = pad.left + i * groupW + groupW / 2;
+      const ly = pad.top + plotH + 6;
+      return `
+  <rect x="${px1.toFixed(1)}" y="${(pad.top+plotH-ph).toFixed(1)}" width="${barW.toFixed(1)}" height="${ph.toFixed(1)}" fill="rgba(61,122,58,0.65)" stroke="rgba(61,122,58,0.9)" stroke-width="1"/>
+  <rect x="${px2.toFixed(1)}" y="${(pad.top+plotH-qh).toFixed(1)}" width="${barW.toFixed(1)}" height="${qh.toFixed(1)}" fill="rgba(232,184,75,0.75)" stroke="rgba(232,184,75,0.95)" stroke-width="1"/>
+  <text x="${lx.toFixed(1)}" y="${ly}" transform="rotate(35,${lx.toFixed(1)},${ly})" font-size="10" fill="#555">${lbl}</text>`;
+    }).join("");
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + 50}" font-family="Arial, sans-serif">
+  <rect width="${W}" height="${H + 50}" fill="white"/>
+  ${yTicks.map(v => `<line x1="${pad.left}" y1="${py(v).toFixed(1)}" x2="${pad.left+plotW}" y2="${py(v).toFixed(1)}" stroke="#e8e4da" stroke-dasharray="3,3"/>
+  <line x1="${pad.left-4}" y1="${py(v).toFixed(1)}" x2="${pad.left}" y2="${py(v).toFixed(1)}" stroke="#999"/>
+  <text x="${pad.left-8}" y="${py(v).toFixed(1)}" dominant-baseline="middle" text-anchor="end" font-size="11" fill="#555">${v.toFixed(1)}%</text>`).join("\n  ")}
+  <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+plotH}" stroke="#ccc"/>
+  <line x1="${pad.left}" y1="${pad.top+plotH}" x2="${pad.left+plotW}" y2="${pad.top+plotH}" stroke="#ccc"/>
+  ${bars}
+  <text x="${-(pad.top+plotH/2)}" y="14" transform="rotate(-90)" text-anchor="middle" font-size="13" fill="#444">% of genes</text>
+  ${legItems.map((it, i) => `<rect x="${pad.left + i*190}" y="${legY - 6}" width="18" height="12" fill="${it.color}"/>
+  <text x="${pad.left + i*190 + 24}" y="${legY}" dominant-baseline="middle" font-size="12" fill="#333">${it.label}</text>`).join("\n  ")}
+</svg>`;
+
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `phylostratr_${data.genotype}.svg`;
+    a.click();
+  });
+
+  // ── Download TSV ──
+  document.getElementById("dl-phylo-tsv").addEventListener("click", () => {
+    const rows = [
+      ["Stratum", "Name", "Query count", "Query %", "Population count", "Population %", "Direction", "Adj. p-value (BH)", "Significant"],
+      ...data.strata.map(s => [
+        s.label, s.name,
+        s.query_count, s.query_pct + "%",
+        s.pop_count,   s.pop_pct   + "%",
+        s.direction,
+        s.adj_pvalue.toExponential(4),
+        s.adj_pvalue < 0.05 ? "Yes" : "No",
+      ]),
+      [],
+      ["Global Chi-squared p-value", data.chi2_pvalue.toExponential(4), data.chi2_pvalue < 0.05 ? "Significant" : "ns"],
+    ];
+    const tsv = rows.map(r => r.join("\t")).join("\n");
+    const blob = new Blob([tsv], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `phylostratr_${data.genotype}.tsv`;
+    a.click();
+  });
+}
+
+
+// ── Load Genes validation ──
+document.getElementById("load-genes-btn").addEventListener("click", async function() {
+  const btn = this;
+  const resultBox = document.getElementById("load-genes-result");
+  const genesText = document.getElementById("genes").value.trim();
+  if (!genesText) { resultBox.style.display="none"; return; }
+  btn.disabled = true;
+  btn.textContent = "Checking…";
+  resultBox.style.display = "none";
+  try {
+    const fd = new FormData();
+    fd.append("genes", genesText);
+    const resp = await fetch("/validate_genes", { method: "POST", body: fd });
+    const data = await resp.json();
+    if (data.error) {
+      resultBox.className = "load-genes-result err";
+      resultBox.innerHTML = `<strong>Error:</strong> ${data.error}`;
+    } else {
+      const nf = data.not_found || [];
+      const geno = data.genotype ? ` · Detected: <strong>${data.genotype}</strong>` : "";
+      if (nf.length === 0) {
+        resultBox.className = "load-genes-result ok";
+        resultBox.innerHTML = `✅ All <strong>${data.found}</strong> genes found in genome${geno}`;
+      } else {
+        const maxShow = 20;
+        const shown   = nf.slice(0, maxShow).map(g => `<span class="lge-not-found">${g}</span>`).join(", ");
+        const more    = nf.length > maxShow ? ` <em>…and ${nf.length - maxShow} more</em>` : "";
+        resultBox.className = "load-genes-result";
+        resultBox.innerHTML = `⚠ <strong>${data.found}</strong>/${data.total} genes found${geno}<br>`
+          + `<span class="lge-not-found">Not found (${nf.length}):</span> ${shown}${more}`;
+      }
+    }
+    resultBox.style.display = "block";
+  } catch(e) {
+    resultBox.className = "load-genes-result err";
+    resultBox.innerHTML = `<strong>Network error:</strong> ${e.message}`;
+    resultBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Load Genes";
+  }
+});
+</script>
+</body>
+</html>
