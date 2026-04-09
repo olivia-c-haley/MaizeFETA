@@ -79,8 +79,8 @@ All annotation files are tab-separated with at minimum the columns `GENE_MODEL`,
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/feta.git
-cd feta
+git clone https://github.com/olivia-c-haley/MaizeFETA.git
+cd MaizeFETA
 ```
 
 ### 2. Create conda environment (recommended)
