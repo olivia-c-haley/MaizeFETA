@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FETA — RNA-seq Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    :root {
+      --ink: #1c1c14;
+      --paper: #f4f2eb;
+      --cream: #f0ead8;
+      --gold: #e8b84b;
+      --gold-dark: #c49428;
+      --peach: #e8a882;
+      --peach-pale: #f5ddd0;
+      --sky: #89c4d4;
+      --sky-pale: #d8eff5;
+      --sky-dark: #4a9ab0;
+      --green: #407F3D;
+      --green-dark: #2e5c2c;
+      --green-light: #5a9e57;
+      --green-pale: #d6ecd5;
+      --red-soft: #d47800;
+      --border: #d4cebc;
+      --shadow: rgba(45,92,44,0.14);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Instrument Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .nav-brand-logo {
+      height: 32px;
+      width: auto;
+    }
+    .nav-brand-text {
+      font-family: 'Instrument Sans', sans-serif;
+      color: var(--cream);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+      line-height: 1.3;
+    }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-links a.active { background: var(--sky-dark); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, #407F3D 100%);
+      padding: 3.5rem 2.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 em { color: var(--gold); font-style: italic; }
+    .hero-sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    /* ── PAGE BODY ── */
+    .page-body { display: grid; grid-template-columns: 360px 1fr; min-height: calc(100vh - 160px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar { background: var(--cream); border-right: 1px solid var(--border); padding: 1.5rem 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+    .step-block { padding: 1rem 0; }
+    .step-label { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--sky-dark); color: #fff; font-family: 'Instrument Sans', sans-serif; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-dark); }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ── MODE SELECTOR ── */
+    .mode-selector { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+    .mode-btn {
+      flex: 1; padding: 0.55rem 0.5rem; border: 1.5px solid var(--border); border-radius: 8px;
+      background: #fff; font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem;
+      font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; line-height: 1.3;
+      color: #666;
+    }
+    .mode-btn:hover { border-color: var(--sky-dark); color: var(--sky-dark); background: var(--sky-pale); }
+    .mode-btn.active { background: var(--sky-dark); border-color: var(--sky-dark); color: #fff; }
+    .mode-btn .mode-icon { display: block; font-size: 1.1rem; margin-bottom: 0.2rem; }
+
+    /* ── STUDY BROWSER ── */
+    #browser-panel { display: none; }
+    #browser-panel.visible { display: block; }
+    .browser-search-wrap {
+      position: relative; margin-bottom: 1rem;
+    }
+    .browser-search-wrap input {
+      width: 100%; padding: 0.55rem 0.75rem 0.55rem 2.2rem;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.88rem;
+      background: #fff; color: var(--ink); transition: border-color 0.15s;
+    }
+    .browser-search-wrap input:focus { outline: none; border-color: var(--sky-dark); }
+    .browser-search-icon {
+      position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
+      font-size: 0.95rem; color: #aaa; pointer-events: none;
+    }
+    .browser-filters {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;
+    }
+    .browser-filter-item label { font-size: 0.72rem; color: #888; display: block; margin-bottom: 0.2rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .browser-filter-item select {
+      width: 100%; padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem;
+      background: #fff; color: var(--ink); cursor: pointer;
+    }
+    .browser-filter-item select:focus { outline: none; border-color: var(--sky-dark); }
+    .browser-results-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 0.75rem;
+    }
+    .browser-results-title { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); }
+    .browser-results-count { font-size: 0.75rem; color: #999; }
+    .study-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .study-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 1rem 1.1rem; cursor: pointer;
+      display: flex; flex-direction: column; gap: 0.45rem;
+      box-shadow: 0 1px 4px var(--shadow);
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .study-card:hover { box-shadow: 0 3px 10px var(--shadow); border-color: var(--sky-dark); }
+    .study-card.selected { border-color: var(--green); background: var(--green-pale); box-shadow: 0 2px 8px var(--shadow); }
+    .study-card-title { font-size: 0.88rem; font-weight: 700; color: var(--green-dark); line-height: 1.35; }
+    .study-card-meta { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.1rem; }
+    .study-tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 600;
+      padding: 0.1rem 0.45rem; border-radius: 4px; width: fit-content;
+    }
+    .study-tag.genotype  { background: var(--green-pale); color: var(--green-dark); }
+    .study-tag.tissue    { background: var(--sky-pale);   color: #1a4a5a; }
+    .study-tag.condition { background: #fff0d0;           color: #7a4000; }
+    .study-tag.curation  { background: var(--peach-pale); color: #8a3a1a; }
+    .study-list-empty {
+      grid-column: 1 / -1;
+      text-align: center; color: #bbb; padding: 2.5rem 1rem; font-size: 0.88rem; font-style: italic;
+    }
+    .load-study-btn {
+      width: 100%; margin-top: 0.75rem; padding: 0.6rem; border: none; border-radius: 8px;
+      background: var(--green); color: #fff;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s; display: none;
+    }
+    .load-study-btn:hover { background: var(--green-dark); }
+    .load-study-btn.visible { display: block; }
+
+    /* file drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: #fff;
+      font-size: 0.82rem;
+      color: #888;
+      margin-bottom: 0.6rem;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--sky-dark); background: var(--sky-pale); color: var(--sky-dark); }
+    .drop-zone.loaded { border-color: var(--green); background: var(--green-pale); color: var(--green-dark); }
+    .drop-zone-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    #file-input { display: none; }
+
+    /* gene textarea */
+    textarea { width: 100%; height: 110px; resize: vertical; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem; background: #fff; color: var(--ink); }
+    textarea:focus { outline: none; border-color: var(--green-light); }
+
+    /* threshold controls */
+    .threshold-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .threshold-item label { font-size: 0.75rem; color: #666; display: block; margin-bottom: 0.2rem; }
+    .threshold-item input[type="number"] {
+      width: 100%; padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border); border-radius: 5px;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.82rem;
+      background: #fff; color: var(--ink);
+    }
+    .threshold-item input:focus { outline: none; border-color: var(--green-light); }
+
+    /* buttons */
+    .run-btn {
+      width: 100%; padding: 0.65rem; border: none; border-radius: 8px;
+      background: var(--green); color: #fff;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+    }
+    .run-btn:hover { background: var(--green-dark); }
+    .run-btn:disabled { background: #aaa; cursor: not-allowed; }
+    .secondary-btn {
+      width: 100%; padding: 0.55rem; border: 1px solid var(--border); border-radius: 8px;
+      background: #fff; color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; margin-top: 0.4rem;
+    }
+    .secondary-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
+    .secondary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .warning-msg { display: none; color: var(--red-soft); font-size: 0.78rem; margin-top: 0.4rem; padding: 0.4rem 0.6rem; background: #fff8ee; border-radius: 5px; border: 1px solid #f0c878; }
+    .warning-msg.show { display: block; }
+    .info-msg { font-size: 0.78rem; color: #777; margin-top: 0.35rem; padding: 0.35rem 0.5rem; background: var(--sky-pale); border-radius: 5px; border: 1px solid var(--sky); display: none; }
+    .info-msg.show { display: block; }
+
+    /* send-to section */
+    .send-section { margin-top: 0.75rem; }
+    .send-label { font-size: 0.75rem; color: #666; margin-bottom: 0.4rem; font-weight: 600; }
+    .send-btns { display: flex; gap: 0.4rem; flex-direction: column; }
+    .send-btn {
+      padding: 0.5rem 0.75rem; border-radius: 7px; border: 1px solid var(--border);
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; background: #fff; text-align: left;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .send-btn:hover:not(:disabled) { background: var(--green-pale); border-color: var(--green); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .send-btn .send-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── RESULTS PANEL ── */
+    .results-panel { padding: 1.5rem; overflow-y: auto; }
+    .results-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; gap: 0.75rem; color: #aaa; text-align: center; }
+    .results-placeholder .big-icon { font-size: 3.5rem; opacity: 0.35; }
+    .results-placeholder p { font-size: 0.95rem; max-width: 340px; line-height: 1.5; }
+
+    /* ── VOLCANO CHART ── */
+    .volcano-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .volcano-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+    .volcano-title { font-size: 0.95rem; font-weight: 600; color: var(--green-dark); }
+    .dl-btn {
+      padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+      font-family: 'Instrument Sans', sans-serif;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .dl-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
+    .chart-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    #volcano-svg { display: block; width: 100%; overflow: visible; }
+
+    /* dot tooltip */
+    .volcano-tooltip {
+      position: fixed; pointer-events: none;
+      background: rgba(28,28,20,0.92); color: #fff;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.72rem;
+      padding: 0.45rem 0.65rem; border-radius: 6px;
+      white-space: pre; line-height: 1.6;
+      z-index: 9999; display: none;
+      max-width: 260px; white-space: normal;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      background: var(--cream); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem 1rem;
+      margin-bottom: 1rem; font-size: 0.82rem;
+    }
+    .stat-chip { display: flex; flex-direction: column; gap: 0.1rem; }
+    .stat-chip-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-chip-val { font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 0.88rem; }
+    .stat-chip-val.up   { color: var(--green-dark); }
+    .stat-chip-val.down { color: #b84800; }
+    .stat-chip-val.ns   { color: #999; }
+
+    /* ── GENE TABLE ── */
+    .gene-table-wrap { background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    .gene-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+    .gene-table-title { font-size: 0.95rem; font-weight: 600; color: var(--green-dark); }
+    .gene-table-scroll { overflow-x: auto; max-height: 320px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { background: var(--green); }
+    thead th { padding: 0.5rem 0.75rem; text-align: left; color: #fff; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:hover { background: var(--sky-pale); }
+    tbody td { padding: 0.4rem 0.75rem; font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem; white-space: nowrap; }
+    .badge { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    .badge-up   { background: var(--green-pale); color: var(--green-dark); }
+    .badge-down { background: #fdecea; color: #b84800; }
+
+    /* quadrant selector */
+    .quadrant-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: center; }
+    .quadrant-btn {
+      padding: 0.3rem 0.75rem; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.78rem; font-weight: 500; cursor: pointer; background: #fff;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .quadrant-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
+    .quadrant-btn.active { background: var(--sky-dark); color: #fff; border-color: var(--sky-dark); }
+    .quadrant-btn.up.active   { background: var(--green-dark); border-color: var(--green-dark); }
+    .quadrant-btn.down.active { background: #b84800; border-color: #b84800; }
+
+    /* ── FAST DOT HIGHLIGHTING via CSS ── */
+    /* Default state */
+    #volcano-svg .vdot { transition: opacity 0.08s; }
+    /* When a quadrant is active, dim all dots via container class... */
+    #volcano-svg.has-selection .vdot { opacity: 0.12 !important; r: 3; }
+    /* ...then un-dim selected ones */
+    #volcano-svg.has-selection .vdot.sel { opacity: 0.95 !important; r: 4.5; stroke: #1c1c14; stroke-width: 0.8; }
+
+    /* draggable threshold lines */
+    .thresh-line { cursor: ew-resize; }
+    .thresh-line.fdr-line { cursor: ns-resize; }
+    .thresh-hit-area { fill: transparent; stroke: none; }
+    .quadrant-overlay { fill: transparent; cursor: pointer; transition: fill 0.15s; }
+    .quadrant-overlay:hover { fill: rgba(74,154,176,0.07); }
+    .quadrant-overlay.active-up   { fill: rgba(46,92,44,0.09); }
+    .quadrant-overlay.active-down { fill: rgba(184,72,0,0.09); }
+    .quadrant-overlay.active-all  { fill: rgba(74,154,176,0.07); }
+
+    .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; gap: 1rem; color: var(--green); }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--green-pale); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* greyed-out send button */
+    .send-btn.genome-mismatch { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    .send-btn .send-genome-note { font-size: 0.7rem; color: #999; margin-left: auto; font-style: italic; }
+
+    /* ── COLUMN MAPPER ── */
+    #mapper-panel { display: none; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+    #mapper-panel.visible { display: block; }
+    .mapper-header { margin-bottom: 1rem; }
+    .mapper-header h3 { font-size: 1rem; font-weight: 600; color: var(--green-dark); margin-bottom: 0.2rem; }
+    .mapper-header p  { font-size: 0.82rem; color: #888; line-height: 1.4; }
+    .mapper-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+    .mapper-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .mapper-table thead tr { background: var(--green); }
+    .mapper-table thead th { padding: 0.5rem 0.85rem; color: #fff; font-weight: 600; font-size: 0.78rem; text-align: left; white-space: nowrap; }
+    .mapper-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    .mapper-table tbody tr:last-child { border-bottom: none; }
+    .mapper-table tbody tr:hover { background: var(--sky-pale); }
+    .mapper-table td { padding: 0.5rem 0.85rem; vertical-align: middle; }
+    .mapper-col-name { font-weight: 600; color: var(--ink); font-size: 0.82rem; }
+    .mapper-example  { color: #aaa; font-size: 0.73rem; font-style: italic; margin-top: 0.1rem; }
+    .mapper-role-sel {
+      padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 5px;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem;
+      background: #fff; color: var(--ink); cursor: pointer; width: 100%; min-width: 140px;
+    }
+    .mapper-role-sel:focus { outline: none; border-color: var(--sky-dark); }
+    .mapper-role-sel.role-gene   { border-color: var(--gold-dark); background: #fff8e6; color: #7a4000; }
+    .mapper-role-sel.role-fc     { border-color: var(--green);     background: var(--green-pale); color: var(--green-dark); }
+    .mapper-role-sel.role-pval   { border-color: var(--sky-dark);  background: var(--sky-pale);   color: #1a4a5a; }
+    .mapper-role-sel.role-fdr    { border-color: var(--sky-dark);  background: var(--sky-pale);   color: #1a4a5a; }
+    .mapper-transform-cell { white-space: nowrap; }
+    .mapper-transform-cell label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: #666; cursor: pointer; white-space: nowrap; }
+    .mapper-transform-cell input[type="checkbox"] { accent-color: var(--sky-dark); width: 13px; height: 13px; }
+    .mapper-show-more {
+      width: 100%; padding: 0.4rem; background: none; border: none; border-top: 1px solid var(--border);
+      color: var(--sky-dark); font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .mapper-show-more:hover { background: var(--sky-pale); }
+    .mapper-error { font-size: 0.78rem; color: #b84800; background: #fff8ee; border: 1px solid #f0c878; border-radius: 5px; padding: 0.4rem 0.6rem; margin-bottom: 0.75rem; display: none; }
+    .mapper-error.show { display: block; }
+    .plot-btn {
+      width: 100%; padding: 0.65rem; border: none; border-radius: 8px;
+      background: var(--green); color: #fff;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .plot-btn:hover { background: var(--green-dark); }
+    .plot-btn:disabled { background: #bbb; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">
+    <img class="nav-brand-logo"
+         src="{{ url_for('static', filename='images/feta_banner.png') }}"
+         alt="FETA">
+  </a>
+  <div class="nav-links">
+    <a href="/">B73 Enrichment</a>
+    <a href="/nonb73">Non-B73 Enrichment</a>
+    <a href="/analytics">Other Analytics</a>
+    <a href="/rnaseq" class="active">RNA-seq Analysis</a>
+    <a href="/data-sources">Data Sources</a>
+    <a href="/faq">FAQ</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner" style="text-align:center;max-width:100%;">
+    <div class="hero-eyebrow">Maize Genomics Tool</div>
+    <h1>RNA-seq<br><em>Analysis</em></h1>
+    <p class="hero-sub" style="max-width:560px;margin:0 auto;">Upload your own EdgeR output or browse curated MaizeGDB RNA-seq datasets to visualize DEGs and send gene lists directly to enrichment analysis.</p>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- Step 1: Mode -->
+    <div class="step-block">
+      <div class="step-label">
+        <div class="step-num">1</div>
+        <span class="step-title">Select your mode</span>
+      </div>
+      <div class="mode-selector">
+        <button class="mode-btn active" id="mode-upload" onclick="setMode('upload')" style="pointer-events:auto;">
+          <span class="mode-icon" style="pointer-events:none;">📂</span><span style="pointer-events:none;">Upload RNA-seq Data</span>
+        </button>
+        <button class="mode-btn" id="mode-browse" onclick="setMode('browse')" style="pointer-events:auto;">
+          <span class="mode-icon" style="pointer-events:none;display:block;height:2.6rem;line-height:2.6rem;">
+            <img src="{{ url_for('static', filename='images/maizegdb_icon.png') }}" alt="" style="width:2.4rem;height:2.4rem;vertical-align:middle;pointer-events:none;" onerror="this.replaceWith(document.createTextNode('🌽'))">
+          </span><span style="pointer-events:none;">MaizeGDB Curated Datasets</span>
+        </button>
+      </div>
+
+      <!-- Upload sub-panel -->
+      <div id="upload-subpanel">
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="drop-zone-icon">📂</div>
+          <div id="drop-zone-text">Click or drag &amp; drop your EdgeR, DESeq2, etc. data in .txt, .tsv, or .csv format</div>
+        </div>
+        <input type="file" id="file-input" accept=".txt,.tsv,.csv">
+        <p class="warning-msg" id="file-warn">Please upload a valid data file.</p>
+        <div class="info-msg" id="file-info"></div>
+      </div>
+
+      <!-- MaizeGDB sub-panel -->
+      <div id="browse-subpanel" style="display:none;">
+        <div class="info-msg" id="browse-loaded-info"></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Reset Data -->
+    <div style="padding:0.5rem 0;">
+      <button class="secondary-btn" id="reset-data-btn" disabled style="margin-top:0;">↩ Reset Data / Remap Columns</button>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Step 2: Thresholds -->
+    <div class="step-block">
+      <div class="step-label">
+        <div class="step-num">2</div>
+        <span class="step-title">Threshold lines</span>
+      </div>
+      <div class="threshold-grid">
+        <div class="threshold-item">
+          <label>logFC cutoff (±)</label>
+          <input type="number" id="thresh-fc" value="2" min="0" step="0.1">
+        </div>
+        <div class="threshold-item">
+          <label id="thresh-fdr-label-text" style="white-space:nowrap;">-log10(FDR/p-val) cutoff</label>
+          <input type="number" id="thresh-fdr" value="2" min="0" step="0.1">
+        </div>
+      </div>
+      <div style="display:flex;gap:0.4rem;margin-top:0.4rem;">
+        <button class="secondary-btn" id="apply-thresh-btn" disabled style="margin-top:0;flex:1;">↺ Apply</button>
+        <button class="secondary-btn" id="reset-thresh-btn" disabled style="margin-top:0;flex:1;">✕ Reset</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Step 3: Extract & Send -->
+    <div class="step-block">
+      <div class="step-label">
+        <div class="step-num">3</div>
+        <span class="step-title">Extract &amp; send DEGs</span>
+      </div>
+      <p style="font-size:0.78rem;color:#777;margin-bottom:0.6rem;line-height:1.4;">
+        Select a quadrant in the plot or use the buttons below to choose which genes to extract, then send them to enrichment analysis.
+      </p>
+      <div id="extract-status" class="info-msg"></div>
+
+      <div class="send-section">
+        <div class="send-label">Send selected genes to:</div>
+        <div class="send-btns">
+          <button class="send-btn" id="send-b73-btn" disabled>
+            <span class="send-dot" style="background:var(--green-dark)"></span>
+            B73 Enrichment
+            <span class="send-genome-note" id="send-b73-note"></span>
+          </button>
+          <button class="send-btn" id="send-nonb73-btn" disabled>
+            <span class="send-dot" style="background:var(--sky-dark)"></span>
+            Non-B73 Enrichment
+            <span class="send-genome-note" id="send-nonb73-note"></span>
+          </button>
+        </div>
+        <p class="warning-msg" id="send-warn">No genes selected. Click a quadrant button in the plot first.</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── RESULTS ── -->
+  <main class="results-panel" id="results-panel">
+
+    <!-- ── MaizeGDB STUDY BROWSER ── -->
+    <div id="browser-panel">
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:1rem;font-weight:600;color:var(--green-dark);margin-bottom:0.25rem;">MaizeGDB Curated RNA-seq Studies</div>
+        <div style="font-size:0.82rem;color:#888;">Search by keyword or filter by category, then click a study to load it.</div>
+      </div>
+
+      <div class="browser-search-wrap">
+        <span class="browser-search-icon">🔍</span>
+        <input type="text" id="browser-search" placeholder="Search studies, e.g. 'drought', 'ear', 'B73'…" oninput="filterStudies()">
+      </div>
+
+      <div class="browser-filters">
+        <div class="browser-filter-item">
+          <label>Genotype</label>
+          <select id="filter-genotype" onchange="filterStudies()">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="browser-filter-item">
+          <label>Curation Set</label>
+          <select id="filter-curation" onchange="filterStudies()">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="browser-filter-item">
+          <label>Tissue</label>
+          <select id="filter-tissue" onchange="filterStudies()">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="browser-filter-item">
+          <label>Condition</label>
+          <select id="filter-condition" onchange="filterStudies()">
+            <option value="">All</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="browser-results-header">
+        <span class="browser-results-title">Studies</span>
+        <span class="browser-results-count" id="browser-count"></span>
+      </div>
+      <button class="load-study-btn" id="load-study-btn" onclick="loadSelectedStudy()">
+        ▶ Load Selected Study
+      </button>
+      <div class="study-list" id="study-list">
+        <div class="study-list-empty">Loading studies…</div>
+      </div>
+    </div>
+
+    <!-- ── COLUMN MAPPER (upload mode only) ── -->
+    <div id="mapper-panel">
+      <div class="mapper-header">
+        <h3>Map Your Columns</h3>
+        <p>Assign a role to each column. The first non-numeric column is auto-detected as the Gene ID. Check the box if values are already log-transformed. <strong>Choose either p-value or FDR — not both.</strong></p>
+      </div>
+      <div class="mapper-error" id="mapper-error"></div>
+      <div style="position:relative;margin-bottom:0.75rem;">
+        <span style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none;">🔍</span>
+        <input type="text" id="mapper-search"
+          placeholder="Search column names…"
+          style="width:100%;padding:0.45rem 0.75rem 0.45rem 2.1rem;border:1px solid var(--border);border-radius:7px;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;background:#fff;color:var(--ink);"
+          oninput="filterMapperRows(this.value)">
+      </div>
+      <div class="mapper-table-wrap">
+        <table class="mapper-table">
+          <thead><tr>
+            <th>Column</th>
+            <th>Example value</th>
+            <th>Role</th>
+            <th>Already log-transformed?</th>
+          </tr></thead>
+          <tbody id="mapper-tbody"></tbody>
+        </table>
+        <button class="mapper-show-more" id="mapper-show-more" style="display:none;" onclick="toggleExtraRows()"></button>
+      </div>
+      <button class="plot-btn" id="plot-btn" onclick="buildFromMapper()">▶ Generate Volcano Plot</button>
+    </div>
+
+    <div class="results-placeholder" id="placeholder">
+      <div class="big-icon">🧬</div>
+      <p id="placeholder-text">Upload a valid data file to generate a volcano plot.</p>
+    </div>
+    <div id="volcano-container" style="display:none;">
+
+      <!-- MaizeGDB column-choice panel — shown only for browse mode -->
+      <div id="browse-col-choice" style="display:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
+        <div style="font-size:0.88rem;font-weight:600;color:var(--green-dark);margin-bottom:0.75rem;">Visualisation Options</div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Observation (x-axis)</div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;">
+                <input type="radio" name="browse-obs" value="logFC" checked style="accent-color:var(--sky-dark);"> log₂ Fold Change
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;">
+                <input type="radio" name="browse-obs" value="logCPM" style="accent-color:var(--sky-dark);"> log Counts per Million
+              </label>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Statistical Threshold (y-axis)</div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;">
+                <input type="radio" name="browse-stat" value="fdr" checked style="accent-color:var(--sky-dark);"> FDR / Adj. p-value
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;">
+                <input type="radio" name="browse-stat" value="pval" style="accent-color:var(--sky-dark);"> p-value
+              </label>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button onclick="plotBrowseStudy()" style="padding:0.45rem 1.1rem;border:none;border-radius:7px;background:var(--green);color:#fff;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">
+              ↺ Redraw
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stats-bar" id="stats-bar"></div>
+
+      <!-- Volcano plot -->
+      <div class="volcano-wrap">
+        <div class="volcano-header">
+          <span class="volcano-title" id="volcano-title">Volcano Plot</span>
+          <div class="chart-actions">
+            <button class="dl-btn" id="dl-volcano-svg">⬇ SVG</button>
+            <button class="dl-btn" id="dl-volcano-png">⬇ PNG</button>
+            <button class="dl-btn" id="dl-degs-tsv">⬇ DEGs TSV</button>
+          </div>
+        </div>
+        <!-- Quadrant selector buttons -->
+        <div class="quadrant-row">
+          <span style="font-size:0.75rem;color:#888;font-weight:600;">Select quadrant:</span>
+          <button class="quadrant-btn up"   id="qbtn-up"   data-q="up">▲ Up-regulated</button>
+          <button class="quadrant-btn down" id="qbtn-down" data-q="down">▼ Down-regulated</button>
+          <button class="quadrant-btn"      id="qbtn-all"  data-q="all">All DEGs</button>
+          <button class="quadrant-btn"      id="qbtn-clear" data-q="none" style="color:#999;">✕ Clear</button>
+        </div>
+        <svg id="volcano-svg"></svg>
+        <div class="volcano-tooltip" id="volcano-tooltip"></div>
+      </div>
+
+      <!-- Gene table -->
+      <div class="gene-table-wrap" id="gene-table-wrap" style="display:none;">
+        <div class="gene-table-header">
+          <span class="gene-table-title" id="gene-table-title">Selected Genes</span>
+          <div class="chart-actions">
+            <button class="dl-btn" id="dl-selected-tsv">⬇ Download TSV</button>
+          </div>
+        </div>
+        <div class="gene-table-scroll">
+          <table id="gene-table">
+            <thead><tr>
+              <th>Gene Model</th><th>logFC</th><th>logCPM</th><th>F</th><th>PValue</th><th>FDR</th><th>Direction</th>
+            </tr></thead>
+            <tbody id="gene-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="volcano-tooltip" id="volcano-tooltip"></div>
+
+<script>
+// ── State ──
+let _rawData    = [];
+let _threshFC   = 2;
+let _threshFDR  = 2;
+let _selected   = [];
+let _quadrant   = "none";
+let _filename   = "";
+let _detectedGenotype = null;
+let _currentMode      = "upload";   // "upload" | "browse"
+let _allStudies       = [];         // parsed from rnaseq_studies.txt
+let _selectedStudy    = null;       // currently highlighted study card
+let _yAxisLabel       = "−log₁₀(FDR)"; // updated by mapper or reset by parseEdgeR
+let _xAxisLabel       = "log₂ Fold Change"; // updated by browse column choice
+
+// ── Mode Switching ──
+function setMode(mode) {
+  _currentMode = mode;
+  document.getElementById("mode-upload").classList.toggle("active", mode === "upload");
+  document.getElementById("mode-browse").classList.toggle("active", mode === "browse");
+  document.getElementById("upload-subpanel").style.display = mode === "upload" ? "" : "none";
+  document.getElementById("browse-subpanel").style.display = mode === "browse" ? "" : "none";
+
+  const browser  = document.getElementById("browser-panel");
+  const placeholder = document.getElementById("placeholder");
+  const volcano  = document.getElementById("volcano-container");
+
+  if (mode === "browse") {
+    browser.classList.add("visible");
+    // Only show placeholder if no volcano data loaded
+    if (!_rawData.length) {
+      placeholder.style.display = "flex";
+      document.getElementById("placeholder-text").textContent = "Select a study from the list to generate a volcano plot.";
+      volcano.style.display = "none";
+    }
+    if (!_allStudies.length) loadStudyList();
+  } else {
+    browser.classList.remove("visible");
+    document.getElementById("browse-col-choice").style.display = "none";
+    if (!_rawData.length) {
+      placeholder.style.display = "flex";
+      document.getElementById("placeholder-text").textContent = "Upload an EdgeR output file to generate a volcano plot.";
+      volcano.style.display = "none";
+    }
+  }
+}
+
+// ── Study Browser ──
+async function loadStudyList() {
+  try {
+    const resp = await fetch("/rnaseq_studies");
+    const data = await resp.json();
+    if (data.error) { document.getElementById("study-list").innerHTML = `<div class="study-list-empty">${data.error}</div>`; return; }
+    _allStudies = data.studies;
+    populateFilterDropdowns();
+    renderStudyList(_allStudies);
+  } catch(e) {
+    document.getElementById("study-list").innerHTML = `<div class="study-list-empty">Could not load studies: ${e.message}</div>`;
+  }
+}
+
+function populateFilterDropdowns() {
+  const fields = { genotype: "filter-genotype", curation: "filter-curation", tissue: "filter-tissue", condition: "filter-condition" };
+  Object.entries(fields).forEach(([field, id]) => {
+    const vals = [...new Set(_allStudies.map(s => s[field]).filter(Boolean))].sort();
+    const sel  = document.getElementById(id);
+    vals.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; sel.appendChild(o); });
+  });
+}
+
+function filterStudies() {
+  const q    = document.getElementById("browser-search").value.toLowerCase().trim();
+  const geno = document.getElementById("filter-genotype").value;
+  const cur  = document.getElementById("filter-curation").value;
+  const tiss = document.getElementById("filter-tissue").value;
+  const cond = document.getElementById("filter-condition").value;
+
+  const filtered = _allStudies.filter(s => {
+    if (geno && s.genotype  !== geno) return false;
+    if (cur  && s.curation  !== cur)  return false;
+    if (tiss && s.tissue    !== tiss) return false;
+    if (cond && s.condition !== cond) return false;
+    if (q) {
+      const hay = [s.filename, s.genotype, s.curation, s.tissue, s.condition].join(" ").toLowerCase();
+      if (!q.split(/\s+/).every(w => hay.includes(w))) return false;
+    }
+    return true;
+  });
+  renderStudyList(filtered);
+}
+
+function renderStudyList(studies) {
+  const list  = document.getElementById("study-list");
+  const count = document.getElementById("browser-count");
+  count.textContent = `${studies.length} ${studies.length === 1 ? "study" : "studies"}`;
+
+  if (!studies.length) {
+    list.innerHTML = `<div class="study-list-empty">No studies match your filters.</div>`;
+    return;
+  }
+
+  list.innerHTML = studies.map(s => `
+    <div class="study-card${_selectedStudy && _selectedStudy.filename === s.filename ? " selected" : ""}"
+         onclick="selectStudy(${JSON.stringify(s).replace(/"/g, '&quot;')})">
+      <div class="study-card-title">${s.display_name || formatStudyTitle(s.filename)}</div>
+      <div class="study-card-meta">
+        ${s.genotype  ? `<span class="study-tag genotype">${s.genotype}</span>`  : ""}
+        ${s.tissue    ? `<span class="study-tag tissue">${s.tissue}</span>`      : ""}
+        ${s.condition ? `<span class="study-tag condition">${s.condition}</span>` : ""}
+        ${s.curation  ? `<span class="study-tag curation">${s.curation}</span>`  : ""}
+      </div>
+    </div>`).join("");
+}
+
+function formatStudyTitle(filename) {
+  // "Author_Year_Tissue_Condition" → "Author Year — Tissue, Condition"
+  return filename.replace(/\.[^.]+$/, "").replace(/_/g, " ");
+}
+
+function selectStudy(s) {
+  _selectedStudy = s;
+  _browseText = "";
+  document.getElementById("browse-col-choice").style.display = "none";
+  document.getElementById("browse-loaded-info").classList.remove("show");
+  filterStudies();
+  const btn = document.getElementById("load-study-btn");
+  btn.classList.add("visible");
+  btn.textContent = `▶ Load: ${_selectedStudy.display_name || formatStudyTitle(_selectedStudy.filename)}`;
+}
+
+let _browseText = ""; // raw text of the fetched study, held for re-plotting
+
+async function loadSelectedStudy() {
+  if (!_selectedStudy) return;
+  const btn = document.getElementById("load-study-btn");
+  btn.textContent = "Loading…"; btn.disabled = true;
+  try {
+    const resp = await fetch(`/rnaseq_file/${encodeURIComponent(_selectedStudy.filename)}`);
+    if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+    _browseText = await resp.text();
+    _filename   = _selectedStudy.filename.replace(/\.[^.]+$/, "");
+
+    // Update sidebar info
+    const infoEl = document.getElementById("browse-loaded-info");
+    infoEl.textContent = `✓ ${_selectedStudy.display_name || formatStudyTitle(_selectedStudy.filename)}`;
+    infoEl.classList.add("show");
+
+    // Hide browser grid
+    document.getElementById("browser-panel").classList.remove("visible");
+    document.getElementById("placeholder").style.display = "none";
+
+    // Reset radios to defaults then plot immediately
+    document.querySelector('input[name="browse-obs"][value="logFC"]').checked = true;
+    document.querySelector('input[name="browse-stat"][value="fdr"]').checked  = true;
+    document.getElementById("browse-col-choice").style.display = "block";
+    plotBrowseStudy();
+
+  } catch(e) {
+    btn.textContent = `▶ Load: ${_selectedStudy.display_name || formatStudyTitle(_selectedStudy.filename)}`;
+    alert("Could not load study: " + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function plotBrowseStudy() {
+  if (!_browseText) return;
+  const obs  = document.querySelector('input[name="browse-obs"]:checked')?.value  || "logFC";
+  const stat = document.querySelector('input[name="browse-stat"]:checked')?.value || "fdr";
+
+  // Set y-axis label based on chosen stat column
+  _yAxisLabel = stat === "fdr" ? "−log₁₀(FDR)" : "−log₁₀(p-value)";
+  updateThreshLabel();
+
+  const lines = _browseText.trim().split(/\r?\n/);
+  if (lines.length < 2) { alert("Study file appears empty."); return; }
+
+  // EdgeR format: gene | logFC | logCPM | F | PValue | FDR
+  const firstLine = lines[0].split(/\t/);
+  const dataStart = (firstLine[0].toLowerCase().includes("logfc") || firstLine[0].toLowerCase().includes("log")) ? 1 : 0;
+
+  // Determine which column index to use for x-axis and stat
+  // Columns (0-indexed after gene): logFC=1, logCPM=2, F=3, PValue=4, FDR=5
+  const xColIdx   = obs  === "logFC" ? 1 : 2;   // logFC or logCPM
+  const statColIdx = stat === "fdr"   ? 5 : 4;   // FDR or PValue
+
+  const rows = [];
+  for (let i = dataStart; i < lines.length; i++) {
+    const parts = lines[i].split(/\t/);
+    if (parts.length < 6) continue;
+    const gene = parts[0].trim();
+    const xVal = parseFloat(parts[xColIdx]);
+    const statVal = parseFloat(parts[statColIdx]);
+    const logFC = parseFloat(parts[1]), logCPM = parseFloat(parts[2]);
+    const F = parseFloat(parts[3]), pval = parseFloat(parts[4]), fdr = parseFloat(parts[5]);
+    if (!gene || isNaN(xVal) || isNaN(statVal)) continue;
+    // Store the chosen x as logFC (the volcano x-axis field) and chosen stat as fdr
+    rows.push({ gene, logFC: xVal, fdr: statVal, pval, logCPM, F });
+  }
+
+  if (rows.length === 0) { alert("No valid rows found in study file."); return; }
+
+  _rawData = rows;
+  document.getElementById("apply-thresh-btn").disabled = false;
+  document.getElementById("reset-thresh-btn").disabled = false;
+  document.getElementById("reset-data-btn").disabled   = false;
+  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
+  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
+  detectGenomeFromGenes(rows.map(r => r.gene));
+
+  // Update x-axis label to match chosen observation
+  _xAxisLabel = obs === "logFC" ? "log₂ Fold Change" : "log Counts per Million";
+
+  drawVolcano();
+}
+
+// ── File Upload ──
+const dropZone  = document.getElementById("drop-zone");
+const fileInput = document.getElementById("file-input");
+
+dropZone.addEventListener("dragover",  e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("drag-over");
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", () => { if (fileInput.files[0]) processFile(fileInput.files[0]); });
+
+let _parsedLines  = [];   // raw split lines from uploaded file
+let _parsedHeader = [];   // column header strings
+let _showAllRows  = false;
+const COLS_SHOWN  = 8;
+
+function processFile(file) {
+  _filename = file.name.replace(/\.[^.]+$/, "");
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { showColumnMapper(e.target.result); }
+    catch(err) { showFileWarn("Could not parse file: " + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function showColumnMapper(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error("File appears empty.");
+
+  // Split header and first data row by tab
+  const headerCols = lines[0].split(/\t/);
+  const dataRow    = lines[1].split(/\t/);
+
+  // If data row has more columns than header, the extra leading columns are unnamed
+  // (common in R output where row names have no header label)
+  const extraCols = dataRow.length - headerCols.length;
+  const paddedHeader = extraCols > 0
+    ? [...Array(extraCols).fill(""), ...headerCols]
+    : headerCols;
+
+  // Build header names — blank/missing → "Unnamed Column N"
+  _parsedHeader = paddedHeader.map((h, i) => h.trim() === "" ? `Unnamed Column ${i + 1}` : h.trim());
+  _parsedLines  = lines;
+
+  // Auto-detect gene ID: first column whose first data value is non-numeric
+  const autoGeneIdx = _parsedHeader.findIndex((_, i) => {
+    const v = (dataRow[i] || "").trim();
+    return v !== "" && isNaN(parseFloat(v));
+  });
+
+  // Fuzzy role guessing
+  function guessRole(name) {
+    const n = name.toLowerCase();
+    if (n.includes("logfc") || n.includes("log2fc") || n.includes("log_fc") || n === "fc" || n.includes("foldchange")) return "fc";
+    if (n.includes("fdr") || n.includes("padj") || n.includes("adj.p") || n.includes("qval") || n.includes("q_val") || n.includes("bh")) return "fdr";
+    if (n.includes("pvalue") || n.includes("pval") || n === "p" || n.includes("p_val") || n.includes("p.value")) return "pval";
+    return "";
+  }
+
+  function isAlreadyLog(name) {
+    const n = name.toLowerCase();
+    // Suggest pre-logged if name contains "log"
+    return n.includes("log");
+  }
+
+  document.getElementById("file-warn").classList.remove("show");
+  const infoEl = document.getElementById("file-info");
+  infoEl.textContent = `✓ ${_parsedHeader.length} columns, ${lines.length - 1} rows — assign roles below`;
+  infoEl.classList.add("show");
+  dropZone.classList.add("loaded");
+  document.getElementById("drop-zone-text").textContent = `✓ ${_filename}`;
+
+  // Hide placeholder, show mapper
+  document.getElementById("placeholder").style.display = "none";
+  document.getElementById("volcano-container").style.display = "none";
+  document.getElementById("mapper-panel").classList.add("visible");
+  document.getElementById("mapper-error").classList.remove("show");
+  _showAllRows = false;
+  const searchEl = document.getElementById("mapper-search");
+  if (searchEl) searchEl.value = "";
+
+  renderMapperRows(_parsedHeader, dataRow, autoGeneIdx, guessRole, isAlreadyLog);
+}
+
+function renderMapperRows(_parsedHeader, dataRow, autoGeneIdx, guessRole, isAlreadyLog) {
+  const tbody = document.getElementById("mapper-tbody");
+  tbody.innerHTML = "";
+
+  // Only auto-assign FC, pval, fdr to the FIRST matching column each
+  let fcAssigned   = false;
+  let pvalAssigned = false;
+  let fdrAssigned  = false;
+
+  _parsedHeader.forEach((colName, i) => {
+    const example  = (dataRow[i] || "").trim();
+    let autoRole;
+    if (i === autoGeneIdx) {
+      autoRole = "gene";
+    } else {
+      const guess = guessRole(colName);
+      if      (guess === "fc"   && !fcAssigned)   { autoRole = "fc";   fcAssigned   = true; }
+      else if (guess === "fdr"  && !fdrAssigned)  { autoRole = "fdr";  fdrAssigned  = true; }
+      else if (guess === "pval" && !pvalAssigned) { autoRole = "pval"; pvalAssigned = true; }
+      else autoRole = "";
+    }
+    const prelogged = isAlreadyLog(colName);
+
+    const tr = document.createElement("tr");
+    tr.dataset.colname = colName.toLowerCase();
+    if (i >= COLS_SHOWN) tr.classList.add("extra-row");
+    tr.style.display = (i >= COLS_SHOWN && !_showAllRows) ? "none" : "";
+
+    tr.innerHTML = `
+      <td><div class="mapper-col-name">${colName}</div></td>
+      <td class="mapper-example" style="font-style:normal;color:#666;font-size:0.8rem;">${example !== "" ? example : "—"}</td>
+      <td>
+        <select class="mapper-role-sel role-${autoRole || "none"}" data-col="${i}" onchange="onRoleChange(this)">
+          <option value=""    ${!autoRole           ? "selected":""}>— Ignore</option>
+          <option value="gene"${autoRole==="gene"   ? "selected":""}>🔑 Gene ID</option>
+          <option value="fc"  ${autoRole==="fc"     ? "selected":""}>📈 Log Fold Change</option>
+          <option value="pval"${autoRole==="pval"   ? "selected":""}>🔬 p-value</option>
+          <option value="fdr" ${autoRole==="fdr"    ? "selected":""}>✅ FDR / Adj. p-value</option>
+        </select>
+      </td>
+      <td class="mapper-transform-cell" id="transform-cell-${i}">
+        ${renderTransformCell(i, autoRole, prelogged)}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  updateShowMoreBtn();
+}
+
+function filterMapperRows(query) {
+  const q = query.toLowerCase().trim();
+  // When searching, show all rows that match; when empty, restore show/hide logic
+  document.querySelectorAll("#mapper-tbody tr").forEach(tr => {
+    const name = tr.dataset.colname || "";
+    if (q === "") {
+      // Restore normal visibility
+      tr.style.display = (tr.classList.contains("extra-row") && !_showAllRows) ? "none" : "";
+    } else {
+      tr.style.display = name.includes(q) ? "" : "none";
+    }
+  });
+}
+
+function renderTransformCell(colIdx, role, prelogged) {
+  if (role === "fc") {
+    return `<label><input type="checkbox" id="log-fc-${colIdx}" ${prelogged ? "checked" : ""}> Already log₂-transformed</label>`;
+  }
+  if (role === "pval" || role === "fdr") {
+    return `<label><input type="checkbox" id="log-pval-${colIdx}" ${prelogged ? "checked" : ""}> Already −log₁₀-transformed</label>`;
+  }
+  return `<span style="color:#ddd">—</span>`;
+}
+
+function onRoleChange(sel) {
+  const colIdx = parseInt(sel.dataset.col);
+  const role   = sel.value;
+  sel.className = `mapper-role-sel role-${role || "none"}`;
+  const prelogged = (_parsedHeader[colIdx] || "").toLowerCase().includes("log");
+  document.getElementById(`transform-cell-${colIdx}`).innerHTML = renderTransformCell(colIdx, role, prelogged);
+
+  // Enforce single assignment for fc and gene
+  if (role === "fc" || role === "gene") {
+    document.querySelectorAll(".mapper-role-sel").forEach(s => {
+      if (s !== sel && s.value === role) {
+        s.value = "";
+        s.className = "mapper-role-sel role-none";
+        document.getElementById(`transform-cell-${parseInt(s.dataset.col)}`).innerHTML = `<span style="color:#ddd">—</span>`;
+      }
+    });
+  }
+
+  // Check for pval+fdr conflict
+  validateMapperConflict();
+}
+
+function validateMapperConflict() {
+  let hasPval = false, hasFdr = false;
+  document.querySelectorAll(".mapper-role-sel").forEach(s => {
+    if (s.value === "pval") hasPval = true;
+    if (s.value === "fdr")  hasFdr  = true;
+  });
+  const errEl  = document.getElementById("mapper-error");
+  const plotBtn = document.getElementById("plot-btn");
+  if (hasPval && hasFdr) {
+    errEl.textContent = "⚠ Please assign either p-value or FDR — not both. Remove one before continuing.";
+    errEl.classList.add("show");
+    plotBtn.disabled = true;
+    plotBtn.style.background = "#bbb";
+  } else {
+    errEl.classList.remove("show");
+    plotBtn.disabled = false;
+    plotBtn.style.background = "";
+  }
+}
+
+function updateShowMoreBtn() {
+  const btn   = document.getElementById("mapper-show-more");
+  const extra = _parsedHeader.length - COLS_SHOWN;
+  if (extra <= 0) { btn.style.display = "none"; return; }
+  btn.style.display = "";
+  btn.textContent = _showAllRows ? `▲ Show fewer columns` : `▼ Show ${extra} more column${extra > 1 ? "s" : ""}`;
+}
+
+function toggleExtraRows() {
+  _showAllRows = !_showAllRows;
+  document.querySelectorAll(".extra-row").forEach(tr => {
+    tr.style.display = _showAllRows ? "" : "none";
+  });
+  updateShowMoreBtn();
+}
+
+function buildFromMapper() {
+  const errEl = document.getElementById("mapper-error");
+  errEl.classList.remove("show");
+
+  let geneCol = -1, fcCol = -1, pvalCol = -1, fdrCol = -1;
+  let fcPrelogged = false, pvalPrelogged = false;
+
+  document.querySelectorAll(".mapper-role-sel").forEach(sel => {
+    const i = parseInt(sel.dataset.col);
+    if (sel.value === "gene") geneCol = i;
+    if (sel.value === "fc")   { fcCol   = i; fcPrelogged   = document.getElementById(`log-fc-${i}`)?.checked   ?? false; }
+    if (sel.value === "pval") { pvalCol = i; pvalPrelogged = document.getElementById(`log-pval-${i}`)?.checked ?? false; }
+    if (sel.value === "fdr")  { fdrCol  = i; pvalPrelogged = document.getElementById(`log-pval-${i}`)?.checked ?? false; }
+  });
+
+  if (geneCol < 0) { showMapperError("Please assign a Gene ID column."); return; }
+  if (fcCol   < 0) { showMapperError("Please assign a Log Fold Change column."); return; }
+  if (pvalCol >= 0 && fdrCol >= 0) { showMapperError("Please assign either p-value or FDR — not both."); return; }
+  if (pvalCol < 0  && fdrCol < 0)  { showMapperError("Please assign a p-value or FDR column."); return; }
+
+  // FDR takes priority over raw p-value; set y-axis label accordingly
+  const useCol   = fdrCol >= 0 ? fdrCol : pvalCol;
+  _yAxisLabel    = fdrCol >= 0 ? "−log₁₀(FDR)" : "−log₁₀(p-value)";
+  _xAxisLabel    = "log₂ Fold Change";
+  updateThreshLabel();
+
+  const finalRows = [];
+  for (let i = 1; i < _parsedLines.length; i++) {
+    // Support both tab and comma delimiters
+    const parts = _parsedLines[i].split(/\t/).length > 1
+      ? _parsedLines[i].split(/\t/)
+      : _parsedLines[i].split(",");
+    const gene    = (parts[geneCol] || "").trim();
+    if (!gene) continue;
+    let rawFC   = parseFloat(parts[fcCol]  ?? "");
+    let rawPval = parseFloat(parts[useCol] ?? "");
+    if (isNaN(rawFC) || isNaN(rawPval)) continue;
+
+    // Apply log2 to FC if not already log-transformed
+    const logFC = fcPrelogged
+      ? rawFC
+      : Math.log2(Math.max(Math.abs(rawFC), 1e-10)) * (rawFC < 0 ? -1 : 1);
+
+    // Store raw p-value as fdr; −log10 is applied at render time by dotColor/plotting
+    const fdr = pvalPrelogged ? Math.pow(10, -rawPval) : rawPval;
+
+    finalRows.push({ gene, logFC, fdr, pval: fdr, logCPM: 0, F: 0 });
+  }
+
+  if (finalRows.length === 0) { showMapperError("No valid rows found with the selected column assignments."); return; }
+
+  _rawData = finalRows;
+  document.getElementById("mapper-panel").classList.remove("visible");
+  document.getElementById("reset-data-btn").disabled = false;
+  document.getElementById("apply-thresh-btn").disabled = false;
+  document.getElementById("reset-thresh-btn").disabled = false;
+  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
+  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
+  detectGenomeFromGenes(finalRows.map(r => r.gene));
+  drawVolcano();
+}
+
+function showMapperError(msg) {
+  const el = document.getElementById("mapper-error");
+  el.textContent = "⚠ " + msg;
+  el.classList.add("show");
+}
+
+function updateThreshLabel() {
+  const el = document.getElementById("thresh-fdr-label-text");
+  if (!el) return;
+  const short = _yAxisLabel === "−log₁₀(FDR)" ? "-log10(FDR)" : "-log10(p-val)";
+  el.textContent = `${short} cutoff`;
+}
+
+// ── Reset Data / Remap Columns ──
+document.getElementById("reset-data-btn").addEventListener("click", () => {
+  _rawData = []; _selected = []; _quadrant = "none";
+  document.getElementById("volcano-container").style.display = "none";
+  document.getElementById("gene-table-wrap").style.display   = "none";
+  document.getElementById("mapper-panel").classList.add("visible");
+  document.getElementById("apply-thresh-btn").disabled = true;
+  document.getElementById("reset-thresh-btn").disabled = true;
+  document.getElementById("reset-data-btn").disabled   = true;
+  updateQuadrantButtons();
+});
+
+// parseEdgeR kept for legacy — MaizeGDB now uses plotBrowseStudy
+function parseEdgeR(text) {
+  _yAxisLabel = "−log₁₀(FDR)";
+  _xAxisLabel = "log₂ Fold Change";
+  updateThreshLabel();
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error("File appears empty.");
+  const firstLine = lines[0].split(/\t/);
+  let dataStart = (firstLine[0].toLowerCase().includes("logfc") || firstLine[0].toLowerCase().includes("log")) ? 1 : 0;
+  const rows = [];
+  for (let i = dataStart; i < lines.length; i++) {
+    const parts = lines[i].split(/\t/);
+    if (parts.length < 6) continue;
+    const gene = parts[0].trim();
+    const logFC = parseFloat(parts[1]), logCPM = parseFloat(parts[2]);
+    const F = parseFloat(parts[3]), pval = parseFloat(parts[4]), fdr = parseFloat(parts[5]);
+    if (!gene || isNaN(logFC) || isNaN(fdr)) continue;
+    rows.push({ gene, logFC, logCPM, F, pval, fdr });
+  }
+  if (rows.length === 0) throw new Error("No valid data rows found.");
+  _rawData = rows;
+  document.getElementById("apply-thresh-btn").disabled = false;
+  document.getElementById("reset-thresh-btn").disabled = false;
+  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
+  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
+  detectGenomeFromGenes(rows.map(r => r.gene));
+  drawVolcano();
+}
+
+function showFileWarn(msg) {
+  const w = document.getElementById("file-warn"); w.textContent = msg; w.classList.add("show");
+}
+
+// ── Genome Detection → grey out wrong send button ──
+async function detectGenomeFromGenes(geneList) {
+  _detectedGenotype = null;
+  updateSendButtonGenomeState();
+  try {
+    const fd = new FormData();
+    fd.append("genes", geneList.slice(0, 20).join("\n")); // send first 20 for speed
+    const resp = await fetch("/detect_genotype", { method: "POST", body: fd });
+    const data = await resp.json();
+    if (data.genotype) {
+      _detectedGenotype = data.genotype;
+      updateSendButtonGenomeState();
+    }
+  } catch(e) { /* silent — just won't grey anything */ }
+}
+
+function updateSendButtonGenomeState() {
+  const b73Btn    = document.getElementById("send-b73-btn");
+  const nb73Btn   = document.getElementById("send-nonb73-btn");
+  const b73Note   = document.getElementById("send-b73-note");
+  const nb73Note  = document.getElementById("send-nonb73-note");
+
+  // Reset mismatch class first
+  b73Btn.classList.remove("genome-mismatch");
+  nb73Btn.classList.remove("genome-mismatch");
+  b73Note.textContent  = "";
+  nb73Note.textContent = "";
+
+  if (!_detectedGenotype) return;
+
+  if (_detectedGenotype === "B73") {
+    nb73Btn.classList.add("genome-mismatch");
+    nb73Note.textContent = "B73 genes";
+  } else {
+    b73Btn.classList.add("genome-mismatch");
+    b73Note.textContent = `${_detectedGenotype} genes`;
+  }
+}
+
+// ── Threshold Apply (button) ──
+document.getElementById("apply-thresh-btn").addEventListener("click", () => {
+  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
+  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
+  _quadrant = "none"; _selected = [];
+  updateQuadrantButtons(); drawVolcano(); updateGeneTable(); updateSendButtons();
+});
+
+// ── Threshold Reset (button) ──
+document.getElementById("reset-thresh-btn").addEventListener("click", () => {
+  document.getElementById("thresh-fc").value  = 2;
+  document.getElementById("thresh-fdr").value = 2;
+  _threshFC = 2; _threshFDR = 2;
+  _quadrant = "none"; _selected = [];
+  updateQuadrantButtons(); drawVolcano(); updateGeneTable(); updateSendButtons();
+});
+
+// ── Quadrant Buttons ──
+document.querySelectorAll(".quadrant-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const q = btn.dataset.q;
+    _quadrant = (_quadrant === q && q !== "none") ? "none" : q;
+    updateQuadrantButtons(); selectQuadrant(_quadrant);
+  });
+});
+
+function updateQuadrantButtons() {
+  document.querySelectorAll(".quadrant-btn").forEach(b => b.classList.toggle("active", b.dataset.q === _quadrant));
+}
+
+function selectQuadrant(q) {
+  if (q === "none")       _selected = [];
+  else if (q === "up")    _selected = _rawData.filter(r => r.logFC >=  _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+  else if (q === "down")  _selected = _rawData.filter(r => r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+  else if (q === "all")   _selected = _rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+  updateGeneTable(); updateSendButtons(); highlightDots(); updateOverlayHighlight();
+}
+
+function updateSendButtons() {
+  const hasSel = _selected.length > 0;
+  const b73  = document.getElementById("send-b73-btn");
+  const nb73 = document.getElementById("send-nonb73-btn");
+  const warn = document.getElementById("send-warn");
+  // Only enable if has selection AND not genome-mismatched
+  b73.disabled  = !hasSel || b73.classList.contains("genome-mismatch");
+  nb73.disabled = !hasSel || nb73.classList.contains("genome-mismatch");
+  warn.classList.toggle("show", !hasSel && _quadrant !== "none");
+  const statusEl = document.getElementById("extract-status");
+  if (hasSel) { statusEl.textContent = `${_selected.length.toLocaleString()} genes selected`; statusEl.classList.add("show"); }
+  else        { statusEl.classList.remove("show"); }
+}
+
+// ── Send to Enrichment ──
+document.getElementById("send-b73-btn").addEventListener("click",    () => sendToEnrichment("/"));
+document.getElementById("send-nonb73-btn").addEventListener("click", () => sendToEnrichment("/nonb73"));
+
+function sendToEnrichment(targetUrl) {
+  if (!_selected.length) return;
+  sessionStorage.setItem("feta_prefill_genes", _selected.map(r => r.gene).join("\n"));
+  window.location.href = targetUrl + "?prefill=1";
+}
+
+// ── Draw Volcano ──
+function drawVolcano() {
+  document.getElementById("placeholder").style.display       = "none";
+  document.getElementById("volcano-container").style.display = "block";
+  updateStatsBar();
+
+  const svgEl  = document.getElementById("volcano-svg");
+  const W      = svgEl.parentElement.clientWidth - 40 || 700;
+  const H      = Math.min(500, Math.max(380, W * 0.6));
+  const margin = { top: 24, right: 40, bottom: 55, left: 60 };
+  const plotW  = W - margin.left - margin.right;
+  const plotH  = H - margin.top  - margin.bottom;
+
+  svgEl.setAttribute("width",  W);
+  svgEl.setAttribute("height", H);
+  svgEl.innerHTML = "";
+
+  const svg = d3.select(svgEl);
+  const g   = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const logFDRs = _rawData.map(r => -Math.log10(Math.max(r.fdr, 1e-300)));
+  const xPad    = Math.max(Math.abs(d3.min(_rawData, r => r.logFC)), Math.abs(d3.max(_rawData, r => r.logFC))) * 1.1;
+  const xScale  = d3.scaleLinear().domain([-xPad, xPad]).range([0, plotW]).nice();
+  const yScale  = d3.scaleLinear().domain([0, d3.max(logFDRs) * 1.08]).range([plotH, 0]).nice();
+
+  // Store on element for drag/highlight access
+  svgEl._xScale  = xScale;
+  svgEl._yScale  = yScale;
+  svgEl._g       = g;
+  svgEl._plotW   = plotW;
+  svgEl._plotH   = plotH;
+  svgEl._margin  = margin;
+
+  // Grid
+  g.append("g").attr("class","grid")
+    .call(d3.axisLeft(yScale).ticks(5).tickSize(-plotW).tickFormat(""))
+    .selectAll("line").attr("stroke","#ede9de").attr("stroke-dasharray","3,3");
+  g.select(".grid .domain").remove();
+
+  // ── Clickable quadrant overlays (behind dots) ──
+  const fcX  = xScale(_threshFC);
+  const fcXn = xScale(-_threshFC);
+  const fdrY = yScale(_threshFDR);
+
+  // Up quadrant (right of +FC, above FDR)
+  g.append("rect").attr("class","quadrant-overlay").attr("id","qov-up")
+    .attr("x", fcX).attr("y", 0).attr("width", plotW - fcX).attr("height", fdrY)
+    .on("click", () => clickQuadrant("up"));
+  // Down quadrant (left of -FC, above FDR)
+  g.append("rect").attr("class","quadrant-overlay").attr("id","qov-down")
+    .attr("x", 0).attr("y", 0).attr("width", fcXn).attr("height", fdrY)
+    .on("click", () => clickQuadrant("down"));
+  // NS region (between FC lines, any height — not interactive)
+  // We skip that so clicks there do nothing
+
+  // ── Dots ──
+  const tooltip = document.getElementById("volcano-tooltip");
+  g.selectAll(".vdot").data(_rawData).join("circle")
+    .attr("class","vdot")
+    .attr("cx", r => xScale(r.logFC))
+    .attr("cy", r => yScale(-Math.log10(Math.max(r.fdr,1e-300))))
+    .attr("r", 3).attr("opacity", 0.72).attr("fill", r => dotColor(r)).attr("stroke","none")
+    .style("cursor","pointer")
+    .on("mousemove", function(event, r) {
+      tooltip.style.display = "block";
+      tooltip.style.left = (event.clientX + 14) + "px";
+      tooltip.style.top  = (event.clientY - 10) + "px";
+      tooltip.innerHTML = `<strong>${r.gene}</strong><br>logFC: ${r.logFC.toFixed(3)}<br>logCPM: ${r.logCPM.toFixed(3)}<br>FDR: ${r.fdr.toExponential(3)}<br>−log₁₀(FDR): ${(-Math.log10(Math.max(r.fdr,1e-300))).toFixed(2)}`;
+    })
+    .on("mouseleave", () => { tooltip.style.display = "none"; });
+
+  // ── Draggable threshold lines ──
+  drawThresholdLines(g, xScale, yScale, plotW, plotH, svgEl);
+
+  // ── Axes ──
+  g.append("g").attr("transform",`translate(0,${plotH})`)
+    .call(d3.axisBottom(xScale).ticks(8).tickFormat(d3.format(".2~f")))
+    .call(ax => ax.select(".domain").attr("stroke","#ccc"))
+    .call(ax => ax.selectAll("text").attr("font-size",11));
+  g.append("g")
+    .call(d3.axisLeft(yScale).ticks(5))
+    .call(ax => ax.select(".domain").attr("stroke","#ccc"))
+    .call(ax => ax.selectAll("text").attr("font-size",11));
+  g.append("text").attr("x", plotW/2).attr("y", plotH+42)
+    .attr("text-anchor","middle").attr("font-size",13).attr("fill","#555").text(_xAxisLabel);
+  g.append("text").attr("transform","rotate(-90)").attr("x",-(plotH/2)).attr("y",-46)
+    .attr("text-anchor","middle").attr("font-size",13).attr("fill","#555").text(_yAxisLabel);
+
+  highlightDots();
+  updateOverlayHighlight();
+
+  document.getElementById("volcano-title").textContent =
+    `Volcano Plot — ${_filename || "EdgeR results"} (n = ${_rawData.length.toLocaleString()})`;
+}
+
+// ── Draggable threshold lines ──
+function drawThresholdLines(g, xScale, yScale, plotW, plotH, svgEl) {
+  const HIT = 8; // px hit area half-width
+
+  function redrawAfterDrag() {
+    updateStatsBar();
+    // Recolor dots
+    svgEl._g.selectAll(".vdot").attr("fill", r => dotColor(r));
+    // Update overlays position
+    const fcX  = xScale(_threshFC);
+    const fcXn = xScale(-_threshFC);
+    const fdrY = yScale(_threshFDR);
+    svgEl._g.select("#qov-up")  .attr("x", fcX).attr("width", Math.max(0, plotW - fcX)).attr("height", fdrY);
+    svgEl._g.select("#qov-down").attr("width", Math.max(0, fcXn)).attr("height", fdrY);
+    // Re-select quadrant with new thresholds
+    if (_quadrant !== "none") { selectQuadrant(_quadrant); }
+  }
+
+  // +FC vertical line
+  function makeFCDrag(sign) {
+    return d3.drag()
+      .on("start", function() { d3.select(this.parentNode).selectAll(".thresh-label-fc-" + (sign > 0 ? "pos" : "neg")).attr("opacity",1); })
+      .on("drag", function(event) {
+        const val = Math.max(0.01, Math.abs(xScale.invert(Math.max(0, Math.min(plotW, event.x)))));
+        _threshFC = Math.round(val * 100) / 100;
+        document.getElementById("thresh-fc").value = _threshFC;
+        // Move both FC lines together
+        const xPos = xScale( _threshFC);
+        const xNeg = xScale(-_threshFC);
+        g.select("#thresh-fc-pos").attr("x1", xPos).attr("x2", xPos);
+        g.select("#thresh-fc-pos-hit").attr("x", xPos - HIT);
+        g.select("#thresh-fc-pos-label").attr("x", xPos).text(`FC = ${_threshFC.toFixed(2)}`);
+        g.select("#thresh-fc-neg").attr("x1", xNeg).attr("x2", xNeg);
+        g.select("#thresh-fc-neg-hit").attr("x", xNeg - HIT);
+        g.select("#thresh-fc-neg-label").attr("x", xNeg).text(`FC = ${-_threshFC.toFixed(2)}`);
+        redrawAfterDrag();
+      });
+  }
+
+  // FDR horizontal line
+  const fdrDrag = d3.drag()
+    .on("drag", function(event) {
+      const val = Math.max(0, yScale.invert(Math.max(0, Math.min(plotH, event.y))));
+      _threshFDR = Math.round(val * 100) / 100;
+      document.getElementById("thresh-fdr").value = _threshFDR;
+      const y = yScale(_threshFDR);
+      g.select("#thresh-fdr-line").attr("y1", y).attr("y2", y);
+      g.select("#thresh-fdr-hit").attr("y", y - HIT);
+      g.select("#thresh-fdr-label").attr("y", y + 4).text(`FDR = ${_threshFDR.toFixed(2)}`);
+      redrawAfterDrag();
+    });
+
+  function addLine(id, x1, y1, x2, y2) {
+    return g.append("line").attr("id", id)
+      .attr("x1",x1).attr("y1",y1).attr("x2",x2).attr("y2",y2)
+      .attr("stroke","#aaa").attr("stroke-width",1.5).attr("stroke-dasharray","5,3");
+  }
+  function addHitRect(id, x, y, w, h, cursor) {
+    return g.append("rect").attr("id",id).attr("x",x).attr("y",y).attr("width",w).attr("height",h)
+      .attr("fill","transparent").attr("cursor", cursor);
+  }
+  function addLabel(id, x, y, text) {
+    return g.append("text").attr("id",id).attr("x",x).attr("y",y)
+      .attr("text-anchor","middle").attr("font-size",10).attr("fill","#999").text(text);
+  }
+
+  const fcPos = xScale(_threshFC),  fcNeg = xScale(-_threshFC);
+  const fdrY  = yScale(_threshFDR);
+
+  // +FC line
+  addLine("thresh-fc-pos", fcPos, 0, fcPos, plotH);
+  addLabel("thresh-fc-pos-label", fcPos, -6, `FC = ${_threshFC.toFixed(2)}`);
+  addHitRect("thresh-fc-pos-hit", fcPos - HIT, 0, HIT*2, plotH, "ew-resize").call(makeFCDrag(1));
+
+  // -FC line
+  addLine("thresh-fc-neg", fcNeg, 0, fcNeg, plotH);
+  addLabel("thresh-fc-neg-label", fcNeg, -6, `FC = ${-_threshFC.toFixed(2)}`);
+  addHitRect("thresh-fc-neg-hit", fcNeg - HIT, 0, HIT*2, plotH, "ew-resize").call(makeFCDrag(-1));
+
+  // FDR line
+  addLine("thresh-fdr-line", 0, fdrY, plotW, fdrY);
+  addLabel("thresh-fdr-label", plotW + 4, fdrY + 4, `FDR = ${_threshFDR.toFixed(2)}`);
+  addHitRect("thresh-fdr-hit", 0, fdrY - HIT, plotW, HIT*2, "ns-resize").call(fdrDrag);
+}
+
+function clickQuadrant(q) {
+  _quadrant = (_quadrant === q) ? "none" : q;
+  updateQuadrantButtons();
+  selectQuadrant(_quadrant);
+}
+
+function updateOverlayHighlight() {
+  const g = document.getElementById("volcano-svg")._g;
+  if (!g) return;
+  g.select("#qov-up")  .classed("active-up",   _quadrant === "up");
+  g.select("#qov-down").classed("active-down",  _quadrant === "down");
+}
+
+function dotColor(r) {
+  const sig = -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR;
+  const up   = r.logFC >=  _threshFC;
+  const down = r.logFC <= -_threshFC;
+  if (sig && up)   return "rgba(46,92,44,0.85)";
+  if (sig && down) return "rgba(184,72,0,0.85)";
+  return "rgba(180,175,160,0.55)";
+}
+
+function highlightDots() {
+  const svgEl = document.getElementById("volcano-svg");
+  if (!svgEl._g) return;
+  const selGenes = new Set(_selected.map(r => r.gene));
+  // Toggle container class — one write, CSS handles the rest
+  svgEl.classList.toggle("has-selection", selGenes.size > 0);
+  // Only touch individual dots to set/clear the .sel class
+  svgEl._g.selectAll(".vdot").classed("sel", r => selGenes.has(r.gene));
+}
+
+// ── Stats Bar ──
+function updateStatsBar() {
+  const total = _rawData.length;
+  const up    = _rawData.filter(r =>  r.logFC >= _threshFC  && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR).length;
+  const down  = _rawData.filter(r =>  r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR).length;
+  const ns    = total - up - down;
+  document.getElementById("stats-bar").innerHTML = `
+    <div class="stat-chip"><span class="stat-chip-label">Total genes</span><span class="stat-chip-val">${total.toLocaleString()}</span></div>
+    <div class="stat-chip"><span class="stat-chip-label">▲ Up-regulated</span><span class="stat-chip-val up">${up.toLocaleString()}</span></div>
+    <div class="stat-chip"><span class="stat-chip-label">▼ Down-regulated</span><span class="stat-chip-val down">${down.toLocaleString()}</span></div>
+    <div class="stat-chip"><span class="stat-chip-label">Not significant</span><span class="stat-chip-val ns">${ns.toLocaleString()}</span></div>
+    <div class="stat-chip"><span class="stat-chip-label">logFC threshold</span><span class="stat-chip-val">±${_threshFC}</span></div>
+    <div class="stat-chip"><span class="stat-chip-label">${_yAxisLabel} threshold</span><span class="stat-chip-val">${_threshFDR}</span></div>`;
+}
+
+// ── Gene Table ──
+function updateGeneTable() {
+  const wrap  = document.getElementById("gene-table-wrap");
+  const body  = document.getElementById("gene-table-body");
+  const title = document.getElementById("gene-table-title");
+  if (!_selected.length) { wrap.style.display = "none"; return; }
+  const label = _quadrant === "up" ? "Up-regulated" : _quadrant === "down" ? "Down-regulated" : "All DEGs";
+  title.textContent = `${label} — ${_selected.length.toLocaleString()} genes`;
+  wrap.style.display = "block";
+  body.innerHTML = _selected.map(r => {
+    const badge = r.logFC > 0 ? `<span class="badge badge-up">▲ up</span>` : `<span class="badge badge-down">▼ down</span>`;
+    return `<tr><td>${r.gene}</td><td>${r.logFC.toFixed(4)}</td><td>${r.logCPM.toFixed(4)}</td><td>${r.F.toFixed(2)}</td><td>${r.pval.toExponential(3)}</td><td>${r.fdr.toExponential(3)}</td><td>${badge}</td></tr>`;
+  }).join("");
+}
+
+// ── Downloads ──
+document.getElementById("dl-volcano-svg").addEventListener("click", () => {
+  const svgEl = document.getElementById("volcano-svg");
+  const blob  = new Blob([svgEl.outerHTML], { type: "image/svg+xml;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `${_filename || "volcano"}_plot.svg`; a.click();
+});
+
+document.getElementById("dl-volcano-png").addEventListener("click", () => {
+  const svgEl = document.getElementById("volcano-svg");
+  const W = +svgEl.getAttribute("width"), H = +svgEl.getAttribute("height");
+  const canvas = document.createElement("canvas");
+  canvas.width = W*2; canvas.height = H*2;
+  const ctx = canvas.getContext("2d"); ctx.scale(2,2);
+  ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
+  const img = new Image();
+  img.onload = () => { ctx.drawImage(img,0,0); const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=`${_filename||"volcano"}_plot.png`; a.click(); };
+  img.src = URL.createObjectURL(new Blob([svgEl.outerHTML],{type:"image/svg+xml;charset=utf-8"}));
+});
+
+document.getElementById("dl-degs-tsv").addEventListener("click", () => {
+  downloadTSV(_rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR), `${_filename||"degs"}_all.tsv`);
+});
+
+document.getElementById("dl-selected-tsv").addEventListener("click", () => {
+  downloadTSV(_selected, `${_filename||"degs"}_selected.tsv`);
+});
+
+function downloadTSV(rows, filename) {
+  const lines = [["gene_model","logFC","logCPM","F","PValue","FDR","direction"].join("\t"),
+    ...rows.map(r => [r.gene,r.logFC,r.logCPM,r.F,r.pval,r.fdr,r.logFC>0?"up":"down"].join("\t"))];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"}));
+  a.download = filename; a.click();
+}
+</script>
+
+</body>
+</html>

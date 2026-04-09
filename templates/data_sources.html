@@ -64,7 +64,7 @@
 
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, var(--green) 100%);
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, #407F3D 100%);
       padding: 3.5rem 2.5rem 3rem;
       text-align: center;
       position: relative;
@@ -87,17 +87,16 @@
     }
     .hero h1 {
       font-family: 'Instrument Sans', sans-serif;
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      font-weight: 600;
-      color: #fff;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--cream);
       line-height: 1.15;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
-    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero h1 em { color: var(--gold); font-style: italic; }
     .hero-sub {
       color: rgba(255,255,255,0.65);
-      font-size: 0.9rem;
-      max-width: 560px;
+      font-size: 1rem;
+      max-width: 520px;
       margin: 0 auto;
       line-height: 1.6;
     }
@@ -268,6 +267,7 @@
     <a href="/">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
+    <a href="/rnaseq">RNA-seq Analysis</a>
     <a href="/data-sources" class="active">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -543,6 +543,19 @@
       <span class="ds-card-tag tag-both">B73 + NAM</span>
       <p class="ds-card-desc">Protein Sequence Assessment Using a Reference ORF Network (PSAURON). Scores for each gene on a 0.0–1.0 scale reflects the likelihood that the sequence is a genuine protein-coding region. </p>
       <p class="ds-card-cite">Sommer et al.,<em>NAR Genom. Bioinform.</em> 2025 <a href="https://doi.org/10.1093/nargab/lqae189" target="_blank">DOI</a>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── RNA-SEQ ─────────────────── -->
+  <h2 class="ds-section-title">RNA-seq Datasets</h2>
+  <div class="ds-grid">
+
+    <div class="ds-card">
+      <span class="ds-card-name">Hayford et al. 2024 — MaizeGDB Curated RNA-seq</span>
+      <span class="ds-card-tag tag-b73only">B73 only</span>
+      <p class="ds-card-desc">A curated compendium of maize RNA-seq differential expression datasets aggregated from published studies and deposited in MaizeGDB. Datasets were uniformly processed and mapped to B73 v5 gene models, enabling cross-study comparison of DEGs across diverse tissues, developmental stages, and stress conditions. These datasets underpin the MaizeGDB curated study browser in the RNA-seq Analysis tool.</p>
+      <p class="ds-card-cite">Hayford et al., <em>BMC Genomics</em> 2024 · <a href="https://doi.org/10.1186/s12864-024-10443-7" target="_blank">DOI</a></p>
     </div>
 
   </div>

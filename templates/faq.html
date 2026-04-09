@@ -92,21 +92,20 @@
       margin-bottom: 1rem;
     }
     .hero h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      color: #fff;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--cream);
       line-height: 1.15;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
-    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero h1 em { color: var(--gold); font-style: italic; }
     .hero-sub {
       color: rgba(255,255,255,0.65);
-      font-size: 0.9rem;
+      font-size: 1rem;
       max-width: 520px;
       margin: 0 auto;
       line-height: 1.6;
     }
-
     /* ── MAIN CONTENT ── */
     .faq-body {
       max-width: 860px;
@@ -231,6 +230,7 @@
     <a href="/">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
+    <a href="/rnaseq">RNA-seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq" class="active">FAQ</a>
   </div>
@@ -443,6 +443,110 @@
     </button>
     <div class="faq-a">
       <p>Annotations are tied to specific genome releases and pipeline versions and are not updated automatically. The B73 annotations are based on the <strong>B73 v5 genome assembly</strong>. Version details for each annotation pipeline are provided on the Data Sources page. If you require the most current annotations, we recommend checking the primary databases (MaizeGDB, KEGG, UniProt) directly.</p>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────── RNA-SEQ ────────────────────────────────── -->
+  <h2 class="faq-section-title">RNA-seq Analysis</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What does the RNA-seq Analysis page do?
+    </button>
+    <div class="faq-a">
+      <p>The RNA-seq Analysis page lets you visualise differential expression results as an interactive <strong>volcano plot</strong> and extract gene lists directly from it for downstream enrichment analysis in FETA. You can either upload your own differential expression output file or load a curated dataset from MaizeGDB.</p>
+      <p>Once a dataset is loaded, you can adjust logFC and significance thresholds by typing values or dragging the threshold lines on the plot, select up-regulated, down-regulated, or all DEGs with one click, and send the resulting gene list straight to the B73 or Non-B73 Enrichment pages without any copy-pasting.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What file formats can I upload?
+    </button>
+    <div class="faq-a">
+      <p>The uploader accepts <code>.txt</code>, <code>.tsv</code>, and <code>.csv</code> files containing tabular differential expression output — for example, from EdgeR, DESeq2, or similar tools. The file must have a header row. After uploading, a <strong>column mapper</strong> will appear so you can assign each column to its role (gene ID, logFC, p-value, FDR, etc.).</p>
+      <p>Required columns are:</p>
+      <ul>
+        <li><strong>Gene ID</strong> — maize gene model identifiers (e.g. <code>Zm00001eb428070</code>). Auto-detected as the first non-numeric column.</li>
+        <li><strong>logFC</strong> — log₂ fold change values.</li>
+        <li><strong>FDR or p-value</strong> — choose one; if values are not already on a −log₁₀ scale, check the "already log-transformed" box accordingly.</li>
+      </ul>
+      <p>Additional columns (logCPM, F-statistic) are optional and will be included in downloaded gene tables if present.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What are the MaizeGDB curated datasets?
+    </button>
+    <div class="faq-a">
+      <p>The <strong>MaizeGDB curated datasets</strong> are a collection of published maize RNA-seq differential expression results that have been uniformly processed and mapped to B73 v5 gene models, curated by Hayford et al. (2024). They span a wide range of tissues, developmental stages, and stress conditions.</p>
+      <p>To use them, switch to the <strong>MaizeGDB Curated Datasets</strong> mode, then search or filter studies by genotype, tissue, condition, or curation set. Click a study card to select it and press <strong>Load Selected Study</strong> to generate the volcano plot immediately — no file upload required.</p>
+      <div class="faq-callout">
+        💡 Because all curated datasets are mapped to B73 v5, the <strong>Send to B73 Enrichment</strong> button will always be available after loading one. The Non-B73 button will be greyed out.
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      How do I set DEG thresholds, and what do they mean?
+    </button>
+    <div class="faq-a">
+      <p>Two thresholds control which genes are classified as differentially expressed:</p>
+      <ul>
+        <li><strong>logFC cutoff (±):</strong> The minimum absolute log₂ fold change. Genes with |logFC| ≥ this value are considered to have a biologically meaningful expression change. The default is ±2 (i.e. a 4-fold change).</li>
+        <li><strong>−log₁₀(FDR/p-val) cutoff:</strong> The minimum statistical significance on the y-axis. A value of 2 corresponds to FDR ≤ 0.01; a value of 1.3 corresponds to FDR ≤ 0.05. The default is 2.</li>
+      </ul>
+      <p>You can change these values by typing directly into the threshold boxes and clicking <strong>Apply</strong>, or by dragging the dashed lines on the volcano plot itself. Genes in the upper-right quadrant (high positive logFC, high significance) are up-regulated; genes in the upper-left quadrant are down-regulated.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      How do I send my DEGs to enrichment analysis?
+    </button>
+    <div class="faq-a">
+      <p>Use the quadrant selector buttons below the volcano plot — <strong>▲ Up-regulated</strong>, <strong>▼ Down-regulated</strong>, or <strong>All DEGs</strong> — to choose which genes to extract. The selected genes are highlighted on the plot and listed in the gene table below it.</p>
+      <p>Once genes are selected, the <strong>Send to B73 Enrichment</strong> or <strong>Send to Non-B73 Enrichment</strong> buttons in the sidebar become active. Clicking one will open the appropriate enrichment page in a new tab with your gene list pre-filled, ready to run.</p>
+      <div class="faq-callout">
+        💡 The send buttons are automatically disabled if the detected genome does not match the enrichment page — for example, if your file contains Non-B73 gene IDs, the B73 Enrichment button will be greyed out.
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What can I download from the RNA-seq Analysis page?
+    </button>
+    <div class="faq-a">
+      <p>Several download options are available from the volcano plot panel:</p>
+      <ul>
+        <li><strong>⬇ SVG:</strong> Exports the volcano plot as a scalable vector graphic, suitable for publication figures.</li>
+        <li><strong>⬇ PNG:</strong> Exports a raster (2× resolution) image of the current plot.</li>
+        <li><strong>⬇ DEGs TSV:</strong> Downloads all genes meeting the current logFC and significance thresholds as a tab-separated file with columns for gene model, logFC, logCPM, F-statistic, p-value, FDR, and direction.</li>
+        <li><strong>⬇ Download TSV</strong> (gene table): Downloads only the genes in the currently selected quadrant.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggle(this)">
+      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      What should I use as the enrichment background when sending DEGs from RNA-seq?
+    </button>
+    <div class="faq-a">
+      <p>When you send DEGs to the enrichment pages, FETA pre-fills only the <em>query</em> gene list. On the enrichment page, the default background is the full annotated genome for the detected genotype.</p>
+      <p>However, for RNA-seq data it is generally more appropriate to use all <em>expressed</em> genes (i.e. all genes tested for differential expression) as the background, not the full genome. You can do this by pasting that broader gene list into the background field on the enrichment page before running. This avoids inflated significance caused by testing against genes that were never expressed in your experiment.</p>
+      <div class="faq-callout">
+        💡 <strong>Best practice:</strong> Use the full list of genes with detectable expression in your RNA-seq experiment as the custom background, rather than the default whole-genome background.
+      </div>
     </div>
   </div>
 

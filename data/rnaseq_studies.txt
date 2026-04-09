@@ -1,0 +1,67 @@
+Filename	Display Name	Genotype	Curation Set	Tissue	Condition
+v2_Liu_2021_Drought_EdgeR_5mm_ear_WS3vsWW.txt	"Liu 2021 - Drought (WS3 vsWW, 5 mm)	"	B73	Abiotic Stress	Ear	Drought
+v2_Liu_2021_Drought_EdgeR_10mm_ear_WS3vsWW.txt	"Liu 2021 - Drought (WS3 vsWW, 10 mm)	"	B73	Abiotic Stress	Ear	Drought
+v2_Liu_2021_Drought_EdgeR_20mm_ear_WS3vsWW.txt	"Liu 2021 - Drought (WS3 vsWW, 20 mm)	"	B73	Abiotic Stress	Ear	Drought
+v2_Liu_2021_Drought_EdgeR_50mm_ear_WS3vsWW.txt	"Liu 2021 - Drought (WS3 vsWW, 50 mm)	"	B73	Abiotic Stress	Ear	Drought
+v2_Yu_2020_Waterlogging_EdgeR_4h_Vs_0h.txt	Yu 2020 - Waterlogging (0 vs. 4 hr)	B73	Abiotic Stress	Roots	Waterlogging
+v2_Yu_2020_Waterlogging_EdgeR_6h_Vs_0h.txt	Yu 2020 - Waterlogging (0 vs. 6hr)	B73	Abiotic Stress	Roots	Waterlogging
+v2_Yu_2020_Waterlogging_EdgeR_8h_vs_0h.txt	Yu 2020 - Waterlogging (0 vs. 8 hr)	B73	Abiotic Stress	Roots	Waterlogging
+v2_Yu_2020_Waterlogging_EdgeR_10h_vs_0h.txt	Yu 2020 - Waterlogging (0 vs. 10 hr)	B73	Abiotic Stress	Roots	Waterlogging
+v2_Yu_2020_Waterlogging_EdgeR_12h_vs_0h.txt	Yu 2020 - Waterlogging (0 vs. 12 hr)	B73	Abiotic Stress	Roots	Waterlogging
+v2_Song_2017_Drought_EdgeR_DS_vs_WW.txt	Song 2017 - Drought (WW vs. DS)	B73	Abiotic Stress	Leaf	Waterlogging
+v2_Nanni_2022_Ozone_EdgeR_Ele_Vs_Amb.txt	Nanni 2022 - Ozone (Control vs Treatment)	B73	Abiotic Stress	Leaf	Ozone
+v2_Liang_2022_Heat_heat_vs_control.txt	Liang 2022 - Heat (Control vs. Treatment)	B73	Abiotic Stress	Leaf	Heat
+v2_Mu_2017_Nitrogen_EdgeR_HN_vs_LN.txt	Mu 2017 - Nitrogen (Control vs. Treatment)	B73	Abiotic Stress	Leaf	Nutrient
+v2_Li_2017_Salinity_Drought_Heat_Cold_EdgeR_ColdVs_Control.txt	Li 2017 - Cold (Control vs. Treatment)	B73	Abiotic Stress	Leaf	Cold
+v2_Li_2017_Salinity_Drought_Heat_Cold_EdgeR_Drought_Vs_Cont.txt	Li 2017 - Drought (Control vs Treatment)	B73	Abiotic Stress	Leaf	Drought
+v2_Li_2017_Salinity_Drought_Heat_Cold_EdgeR_Heat_Vs_Cont.txt	Li 2017 - Heat (Control vs. Heat)	B73	Abiotic Stress	Leaf	Heat
+v2_Li_2017_Salinity_Drought_Heat_Cold_EdgeR_Salt_vs_Cont.txt	Li 2017 - Salinity (Control vs. Salinity)	B73	Abiotic Stress	Leaf	Salinity
+Gonzalez-Munoz_2015_Phosphorus_EdgeR_Leaf_1000uM_vs_10uM.txt	Gonzalez-Munoz 2015 - Phosphorus (Leaf 1000uM_vs_10uM)	B73	Abiotic Stress	Leaf	Nutrient
+Gonzalez-Munoz_2015_Phosphorus_EdgeR_Root_1000uM_vs_10uM.txt	Gonzalez-Munoz 2015 - Phosphorus (Root 1000uM_vs_10uM)	B73	Abiotic Stress	Roots	Nutrient
+v2_Markarevitch_2015_EdgeR_cold_vs_control.txt	Markarevitch 2015 - Cold (Control vs. Treatment)	B73	Abiotic Stress	Seedling	Cold
+v2_Markarevitch_2015_EdgeR_heat_vs_control.txt	Markarevitch 2015 - Heat (Control vs. Treatment)	B73	Abiotic Stress	Seedling	Heat
+v2_Li_2020_Cold_heat_EdgeR_2020_EHTvsNT.txt	Li 2020 - Heat (Ext. High vs. Normal)	B73	Abiotic Stress	Leaf	Heat
+v2_Li_2020_Cold_heat_EdgeR_2020_ELTvsNT.txt	Li 2020 - Cold (Ext. Low vs Normal)	B73	Abiotic Stress	Leaf	Cold
+v2_Li_2020_Cold_heat_EdgeR_2020_HTvsNT.txt	Li 2020 - Heat (High vs. Normal)	B73	Abiotic Stress	Leaf	Heat
+v2_Li_2020_Cold_heat_EdgeR_2020_LTvsNT.txt	Li 2020 - Cold (Low vs Normal)	B73	Abiotic Stress	Leaf	Cold
+v2_Li_2020_Cold_heat_EdgeR_2020_MLTvsNT.txt	Li 2020 - Cold (Med. Low vs. Normal)	B73	Abiotic Stress	Leaf	Cold
+Li_2020_Cold_Heat_EdgeR_2021_MHTvsNT.txt	Li 2020 - Heat (Med. High vs. Normal)	B73	Abiotic Stress	Leaf	Heat
+v2_He_2016_Nitrogen_Normal-N-12VSLow-N-12h.txt	"He 2016 - Nitrogen (Control vs Low, 12h)"	B73	Abiotic Stress	Roots	Nutrient
+v2_He_2016_Nitrogen_Normal-N-24VSLow-N-24h.txt	"He 2016 - Nitrogen (Control vs Low, 24h)"	B73	Abiotic Stress	Roots	Nutrient
+v2_He_2016_Nitrogen_Normal-N-48VSLow-N-48h.txt	"He 2016 - Nitrogen (Control vs Low, 48h)"	B73	Abiotic Stress	Roots	Nutrient
+v2_He_2016_Nitrogen_Normal-N-96VSLow-N-96h.txt	"He 2016 - Nitrogen (Control vs Low, 96h)"	B73	Abiotic Stress	Roots	Nutrient
+Optiz_2017_6h_0.2MPa_EdgeR_mild water deficit.txt	"Optiz 2017 - Water Deficit (Mild, 6h)"	B73	Abiotic Stress	Roots	Water Deficit
+Optiz_2017_6h_0.8MPa_EdgeR_severe water deficit.txt	"Optiz 2017 - Water Deficit (Severe, 6h)"	B73	Abiotic Stress	Roots	Water Deficit
+Optiz_2017_24h_0.2MPa_EdgeR_mild water deficit.txt	"Optiz 2017 - Water Deficit (Mild, 24h)"	B73	Abiotic Stress	Roots	Water Deficit
+Optiz_2017_24h_0.8MPa_EdgeR_severe water deficit.txt	"Optiz 2017 - Water Deficit (Severe, 24h)"	B73	Abiotic Stress	Roots	Water Deficit
+v2_Cheng_2018_Cadmium_EdgeR_Treated_Untreated.txt	Cheng 2018 - Cadmium (Control vs. Treatment)	B73	Abiotic Stress	Roots	Nutrient
+Ding_2014_Drought_EdgeR_S1_vs_Cont.txt	Ding 2014 - Drought (Control vs. S1)	B73	Abiotic Stress	Leaf	Drought
+Ding_2014_Drought_EdgeR_S3_vs_Cont.txt	Ding 2014 - Drought (Control vs. S3)	B73	Abiotic Stress	Leaf	Drought
+Ding_2014_Drought_EdgeR_S3_vs_S1.txt	Ding 2014 - Drought (S1 vs. S3)	B73	Abiotic Stress	Leaf	Drought
+Forestan_2016_EdgeR_T0_Drought_Vs_Cont.txt	"Forestan 2016 - Drought (Control vs. Treatment, 10 days)"	B73	Abiotic Stress	Leaf	Drought
+Forestan_2016_EdgeR_T0_Drought+Salt_Vs_Cont.txt	"Forestan 2016 - Drought + Salt (Control vs. Treatment, 10 days)"	B73	Abiotic Stress	Leaf	Mix
+Forestan_2016_EdgeR_T0_Salt_Vs_Cont.txt	"Forestan 2016 - Salt (Control vs. Treatment, 10 days)"	B73	Abiotic Stress	Leaf	Salinity
+Forestan_2016_EdgeR_T7_Drought_Vs_Cont.txt	"Forestan 2016 - Drought (Control vs. Treatment, 7-day recovery)"	B73	Abiotic Stress	Leaf	Drought
+Forestan_2016_EdgeR_T7_Drought+Salt_Vs_Cont.txt	"Forestan 2016 - Drought + Salt (Control vs. Treatment, 7-day recovery)"	B73	Abiotic Stress	Leaf	Mix
+Forestan_2016_EdgeR_T7_Salt_vs_Cont.txt	"Forestan 2016 - Salt (Control vs. Treatment, 7-day recovery)"	B73	Abiotic Stress	Leaf	Salinity
+PRJN723826_EdgeR_-Nvs+cPTIO.txt	Ravazzolo 2021 - Nitrogen (-Nvs+cPTIO)	B73	Abiotic Stress	Roots	Nutrient
+Ravazzolo_2021_Nitrate_EdgeR_-Nvs+NO3-.txt	Ravazzolo 2021 - Nitrogen (-Nvs+NO3-)	B73	Abiotic Stress	Roots	Nutrient
+Ravazzolo_2021_Nitrate_EdgeR_+NO3-vs+cPTIO.txt	Ravazzolo 2021 - Nitrogen (+NO3-vs+cPTIO)	B73	Abiotic Stress	Roots	Nutrient
+Ravazzolo_2020_Nitrate_Ammonium_EdgeR_-N_vs+NH4+.txt	Ravazzolo 2020 - Nitrogen (-N_vs+NH4+)	B73	Abiotic Stress	Roots	Nutrient
+Ravazzolo_2020_Nitrate_Ammonium_EdgeR_-N_vs+NO3_.txt	Ravazzolo 2020 - Nitrogen (-N_vs+NO3_)	B73	Abiotic Stress	Roots	Nutrient
+v2_Wang_2021_Fusarium_graminearum_B73-WT_EdgeR_12hai_vs_0hai.txt	"Wang 2021 - Fungal (Control vs. Treatment, 12hai)"	B73	Biotic Stress	Seedling	Microbial
+v2_Wang_2021_Fusarium_graminearum_B73-WT_EdgeR_24hai_vs_0hai.txt	"Wang 2021 - Fungal (Control vs. Treatment, 24hai)"	B73	Biotic Stress	Seedling	Microbial
+v2_Hoopes_2019_Colletotrichum_graminicola_EdgeR_24hpiVS0hpi.txt	"Hoopes 2019 - Fungal (Control vs. Treatment, 24hpi)"	B73	Biotic Stress	Leaf	Microbial
+v2_Hoopes_2019_Colletotrichum_graminicola_EdgeR_48hai_vs_0hai.txt	"Hoopes 2019 - Fungal (Control vs. Treatment, 48hpi)"	B73	Biotic Stress	Leaf	Microbial
+v2_Hoopes_2019_Colletotrichum_graminicola_EdgeR_120hpiVS0hpi.txt	"Hoopes 2019 - Fungal (Control vs. Treatment, 120hpi)"	B73	Biotic Stress	Leaf	Microbial
+v2_Bui_2018_Mites_Herbivores_EdgeR_leaf_BGM-infested_2hpiVS0(no wounding)hpi.txt	"Bui 2018 - Insect (Control vs BGM Infested, 2hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Bui_2018_Mites_Herbivores_EdgeR_leaf_BGM-infested-24hpiVS0(no wounding)hpi.txt	"Bui 2018 - Insect (Control vs BGM Infested, 24hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Bui_2018_Mites_Herbivores_EdgeR_leaf_TSSM-2hpiVS0(n0 wounding)hpi.txt	"Bui 2018 - Insect (Control vs TSSM Infested, 2hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Bui_2018_Mites_Herbivores_EdgeR_leaf_TSSM-24hpiVS0(n0 wounding)hpi.txt	"Bui 2018 - Insect (Control vs TSSM Infested, 24hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Bui_2018_Mites_Herbivores_EdgeR_wounding-2hpiVS0(no wounding)hpi.txt	"Bui 2018 - Insect (Control vs Wounding, 2hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Bui_2018_Mites_Herbivores_EdgeR_wounding-24hpiVS0(no wounding)hpi.txt	"Bui 2018 - Insect (Control vs Wounding, 24hpi)"	B73	Biotic Stress	Leaf	Herbivory
+v2_Swart_2017_C.zeina_EdgeR_LSI_vsLMI.txt	"Swart 2017 - Fungal (Control vs. Treatment, 77 DAP)"	B73	Biotic Stress	Leaf	Microbial
+v2_Kebede_2018_Gibberella_ear_rot_EdgeR_MockVsFusarium(DAI1).txt	"Kebede 2018 - Fungal (Control v. Treatment, 1dai)"	B73	Biotic Stress	Ear	Microbial
+v2_Kebede_2018_Gibberella_ear_rot_EdgeR_MockVsFusarium(DAI2).txt	"Kebede 2018 - Fungal (Control v. Treatment, 2dai)"	B73	Biotic Stress	Ear	Microbial
+v2_Ding_2020_Fusarium_EdgeR_Damage_Vs_Elicited.txt	Ding 2020 - Fungal (Control v. Treatment)	B73	Biotic Stress	Stem	Microbial
+Rodri_guez-Gomez_2022_EdgeR_SCMV_vs_Mock.txte	Rodri_guez-Gomez 2022 - Viral (Control vs. Treatment)m	B73	Biotic Stress	Leaf	Microbial

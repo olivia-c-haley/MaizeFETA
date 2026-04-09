@@ -396,7 +396,27 @@
       top: 0;
       z-index: 2;
       background: var(--green);
+      cursor: pointer;
+      user-select: none;
     }
+    thead th:hover { background: var(--green-dark); }
+    thead th .sort-icon {
+      display: inline-flex; flex-direction: column;
+      margin-left: 0.35rem; vertical-align: middle;
+      gap: 1px; opacity: 0.5;
+    }
+    thead th .sort-icon span {
+      display: block; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
+    }
+    thead th .sort-icon .asc  { border-bottom: 5px solid #fff; }
+    thead th .sort-icon .desc { border-top:    5px solid #fff; }
+    thead th.sort-asc  .sort-icon { opacity: 1; }
+    thead th.sort-desc .sort-icon { opacity: 1; }
+    thead th.sort-asc  .sort-icon .desc { opacity: 0.3; }
+    thead th.sort-desc .sort-icon .asc  { opacity: 0.3; }
+    /* Genes column not sortable */
+    thead th.no-sort { cursor: default; }
+    thead th.no-sort:hover { background: var(--green); }
     tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--sky-pale); }
@@ -814,6 +834,7 @@
     <a href="/" class="active">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
+    <a href="/rnaseq">RNA-seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -1128,32 +1149,27 @@ function renderResults(data, panel) {
       const tableWrap = document.createElement("div");
       tableWrap.className = "table-wrap";
       const table = document.createElement("table");
+      const sortIcon = `<span class="sort-icon"><span class="asc"></span><span class="desc"></span></span>`;
       table.innerHTML = `<thead><tr>
-        <th>ID</th><th>Name</th><th>Adj. p-value</th><th>p-value</th>
-        <th>Type</th><th>Hits</th><th>Expected Hits</th><th>Gene Ratio</th><th>Expected</th><th>Genes</th>
+        <th data-col="label" data-type="str">ID${sortIcon}</th>
+        <th data-col="name"  data-type="str">Name${sortIcon}</th>
+        <th data-col="adj_p_value" data-type="num" class="sort-asc">Adj. p-value${sortIcon}</th>
+        <th data-col="p_value"     data-type="num">p-value${sortIcon}</th>
+        <th data-col="type"        data-type="str">Type${sortIcon}</th>
+        <th data-col="hits"        data-type="num">Hits${sortIcon}</th>
+        <th data-col="expected_hits" data-type="num">Expected Hits${sortIcon}</th>
+        <th data-col="gene_ratio"  data-type="num">Gene Ratio${sortIcon}</th>
+        <th data-col="expected"    data-type="num">Expected${sortIcon}</th>
+        <th class="no-sort">Genes</th>
       </tr></thead>`;
       const tbody = document.createElement("tbody");
-      sorted.forEach(row => {
-        const tr = document.createElement("tr");
-        const badgeClass = row.type === "Overenriched" ? "badge-over" : "badge-under";
-        const geneRatio = (row.hits / totalQueryGenes).toFixed(3);
-        tr.innerHTML = `
-          <td><span style="font-family:'DM Mono',monospace;font-size: 0.875rem;color:var(--green)">${row.label}</span></td>
-          <td>${row.name}</td>
-          <td>${row.adj_p_value.toExponential(2)}</td>
-          <td>${row.p_value.toExponential(2)}</td>
-          <td><span class="badge ${badgeClass}">${row.type}</span></td>
-          <td>${row.hits}</td>
-          <td>${row.expected_hits}</td>
-          <td>${geneRatio}</td>
-          <td>${row.expected.toFixed(3)}</td>
-          <td style="max-width:220px;">${makeGenePills(row.genes)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
       table.appendChild(tbody);
       tableWrap.appendChild(table);
       pane.appendChild(tableWrap);
+
+      // Attach sort state and initial render
+      const tableRows = sorted.map(r => ({ ...r, gene_ratio: r.hits / totalQueryGenes }));
+      attachTableSort(table, tbody, tableRows, totalQueryGenes, "adj_p_value", "asc");
 
       /* ── Figure section HTML ── */
       const figSection = document.createElement("div");
@@ -1279,6 +1295,65 @@ function renderResults(data, panel) {
       if (data[key] && data[key].length > 0) downloadActiveFig(key, ONTOLOGY_LABELS[key] || key, 'png');
     });
   });
+}
+
+/* ════════════════════════════
+   TABLE SORT
+   ════════════════════════════ */
+function renderTableRows(tbody, rows, totalQueryGenes) {
+  tbody.innerHTML = "";
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    const badgeClass = row.type === "Overenriched" ? "badge-over" : "badge-under";
+    const geneRatio = (row.hits / totalQueryGenes).toFixed(3);
+    tr.innerHTML = `
+      <td><span style="font-family:'DM Mono',monospace;font-size:0.875rem;color:var(--green)">${row.label}</span></td>
+      <td>${row.name}</td>
+      <td>${row.adj_p_value.toExponential(2)}</td>
+      <td>${row.p_value.toExponential(2)}</td>
+      <td><span class="badge ${badgeClass}">${row.type}</span></td>
+      <td>${row.hits}</td>
+      <td>${row.expected_hits}</td>
+      <td>${geneRatio}</td>
+      <td>${row.expected.toFixed(3)}</td>
+      <td style="max-width:220px;">${makeGenePills(row.genes)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function attachTableSort(table, tbody, rows, totalQueryGenes, initCol, initDir) {
+  let sortCol = initCol, sortDir = initDir;
+
+  function applySort() {
+    const sorted = [...rows].sort((a, b) => {
+      let av = a[sortCol], bv = b[sortCol];
+      if (typeof av === "string") av = av.toLowerCase();
+      if (typeof bv === "string") bv = bv.toLowerCase();
+      if (av < bv) return sortDir === "asc" ? -1 :  1;
+      if (av > bv) return sortDir === "asc" ?  1 : -1;
+      return 0;
+    });
+    renderTableRows(tbody, sorted, totalQueryGenes);
+    // Update header classes
+    table.querySelectorAll("thead th[data-col]").forEach(th => {
+      th.classList.remove("sort-asc", "sort-desc");
+      if (th.dataset.col === sortCol) th.classList.add(sortDir === "asc" ? "sort-asc" : "sort-desc");
+    });
+  }
+
+  table.querySelectorAll("thead th[data-col]").forEach(th => {
+    th.addEventListener("click", () => {
+      if (th.dataset.col === sortCol) {
+        sortDir = sortDir === "asc" ? "desc" : "asc";
+      } else {
+        sortCol = th.dataset.col;
+        sortDir = th.dataset.type === "str" ? "asc" : "asc";
+      }
+      applySort();
+    });
+  });
+
+  applySort(); // initial render
 }
 
 /* ════════════════════════════
@@ -8160,6 +8235,21 @@ document.getElementById("load-genes-btn").addEventListener("click", async functi
     btn.textContent = "Load Genes";
   }
 });
+
+// ── Prefill from RNA-seq page ──
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("prefill") === "1") {
+    const genes = sessionStorage.getItem("feta_prefill_genes");
+    if (genes) {
+      document.getElementById("genes").value = genes;
+      sessionStorage.removeItem("feta_prefill_genes");
+      updateGeneCount();
+      // Trigger load genes validation automatically
+      document.getElementById("load-genes-btn").click();
+    }
+  }
+})();
 </script>
 </body>
 </html>

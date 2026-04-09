@@ -333,7 +333,7 @@
       text-align: center;
     }
     .results-placeholder .big-icon { font-size: 3.5rem; opacity: 0.3; }
-    .results-placeholder p { font-size: 0.9rem; max-width: 280px; line-height: 1.6; }
+    .results-placeholder p { font-size: 0.95rem; max-width: 340px; line-height: 1.5; }
 
     /* ── TABS ── */
     .tabs-wrapper { margin-bottom: 1rem; }
@@ -693,29 +693,23 @@
     }
     .tab-content { padding: 0 1.5rem 1.5rem; }
 
-    /* ── PSAURON stacked layout ── */
-    .psauron-chart-wrap {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-    .psauron-chart-inner {
-      width: 100%;
-      max-width: 620px;
-    }
-    .psauron-bottom {
+    /* ── PSAURON split layout ── */
+    .psauron-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
       align-items: start;
     }
-    @media (max-width: 800px) { .psauron-bottom { grid-template-columns: 1fr; } }
+    @media (max-width: 1000px) { .psauron-split { grid-template-columns: 1fr; } }
+    .psauron-left { min-width: 0; }
+    .psauron-right { min-width: 0; }
     .psauron-right-actions {
       display: flex;
       gap: 0.6rem;
       margin-bottom: 1.25rem;
       flex-wrap: wrap;
     }
+    .psauron-right .table-wrap table { min-width: 0; width: 100%; }
 
     /* ── ANALYTICS PAGE ── */
     .psauron-grid {
@@ -849,6 +843,7 @@
     <a href="/">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics" class="active">Other Analytics</a>
+    <a href="/rnaseq">RNA-seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -1159,52 +1154,53 @@ function renderPsauron(data, panel) {
     <div class="chart-header">
       <div class="chart-title">PSAURON Classification — ${data.genotype} Genome</div>
       <div class="chart-actions">
-        <button class="dl-btn" id="dl-kde-png">⬇ PNG</button>
-        <button class="dl-btn" id="dl-kde-svg">⬇ SVG</button>
-        <button class="dl-btn" id="dl-stats-tsv">⬇ TSV</button>
+        <button class="dl-btn" id="dl-kde-png">⬇ Download PNG</button>
+        <button class="dl-btn" id="dl-stats-tsv">⬇ Download TSV</button>
       </div>
     </div>
 
-    <!-- TOP: chart centred -->
-    <div class="psauron-chart-wrap">
-      <div class="psauron-chart-inner">
-        <div class="kde-wrap">
-          <div class="stat-card-title">Score Distribution — Query vs Whole Genome</div>
-          <canvas id="psauron-kde-canvas"></canvas>
-          <div class="kde-legend" id="kde-legend-el">
-            <div class="kde-legend-item">
-              <div class="kde-swatch" style="background:rgba(61,122,58,0.85)"></div>
-              <span>Whole Genome (n=${data.pop_n.toLocaleString()})</span>
-            </div>
-            <div class="kde-legend-item">
-              <div class="kde-swatch" style="background:rgba(232,184,75,0.95)"></div>
-              <span>Query (n=${data.query_n.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
-            </div>
-          </div>
+    <!-- FIGURE: full width on top -->
+    <div class="kde-wrap" style="margin-bottom:1.25rem;">
+      <div class="stat-card-title">Score Distribution — Query vs Whole Genome</div>
+      <canvas id="psauron-kde-canvas"></canvas>
+      <div class="kde-legend">
+        <div class="kde-legend-item">
+          <div class="kde-swatch" style="background:rgba(61,122,58,0.85)"></div>
+          <span>Whole Genome (n=${data.pop_n.toLocaleString()})</span>
+        </div>
+        <div class="kde-legend-item">
+          <div class="kde-swatch" style="background:rgba(232,184,75,0.95)"></div>
+          <span>Query (n=${data.query_n.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
         </div>
       </div>
     </div>
 
-    <!-- BOTTOM: stat cards side by side -->
-    <div class="psauron-bottom">
-      <div class="stat-card">
-        <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Score Summary</div>
-        <div class="stat-row"><span class="stat-label">Query mean</span><span class="stat-val">${data.stats.query_mean.toFixed(4)}</span></div>
-        <div class="stat-row"><span class="stat-label">Population mean</span><span class="stat-val">${data.stats.pop_mean.toFixed(4)}</span></div>
-        <div class="stat-row"><span class="stat-label">Query median</span><span class="stat-val">${data.stats.query_median.toFixed(4)}</span></div>
-        <div class="stat-row"><span class="stat-label">Population median</span><span class="stat-val">${data.stats.pop_median.toFixed(4)}</span></div>
-        <div class="stat-row"><span class="stat-label">Query % TRUE</span><span class="stat-val">${(data.stats.query_true_pct * 100).toFixed(1)}%</span></div>
-        <div class="stat-row"><span class="stat-label">Population % TRUE</span><span class="stat-val">${(data.stats.pop_true_pct * 100).toFixed(1)}%</span></div>
-        <div class="stat-row"><span class="stat-label">Direction</span>
-          <span class="stat-val">${data.stats.query_mean > data.stats.pop_mean ? "↑ higher than pop." : "↓ lower than pop."}</span></div>
+    <!-- SUMMARY TABLES: side by side below the figure -->
+    <div class="psauron-split">
+
+      <div class="psauron-left">
+        <div class="stat-card">
+          <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Score Summary</div>
+          <div class="stat-row"><span class="stat-label">Query mean</span><span class="stat-val">${data.stats.query_mean.toFixed(4)}</span></div>
+          <div class="stat-row"><span class="stat-label">Population mean</span><span class="stat-val">${data.stats.pop_mean.toFixed(4)}</span></div>
+          <div class="stat-row"><span class="stat-label">Query median</span><span class="stat-val">${data.stats.query_median.toFixed(4)}</span></div>
+          <div class="stat-row"><span class="stat-label">Population median</span><span class="stat-val">${data.stats.pop_median.toFixed(4)}</span></div>
+          <div class="stat-row"><span class="stat-label">Query % TRUE</span><span class="stat-val">${(data.stats.query_true_pct * 100).toFixed(1)}%</span></div>
+          <div class="stat-row"><span class="stat-label">Population % TRUE</span><span class="stat-val">${(data.stats.pop_true_pct * 100).toFixed(1)}%</span></div>
+          <div class="stat-row"><span class="stat-label">Direction</span>
+            <span class="stat-val">${data.stats.query_mean > data.stats.pop_mean ? "↑ higher than pop." : "↓ lower than pop."}</span></div>
+        </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Statistical Tests</div>
-        ${makeTestRow("Mann-Whitney U", "Are query scores shifted?", data.stats.mw_pvalue)}
-        ${makeTestRow("Kolmogorov-Smirnov", "Do distributions differ?", data.stats.ks_pvalue)}
-        ${makeTestRow("Chi-squared", "TRUE/FALSE enrichment", data.stats.chi2_pvalue)}
+      <div class="psauron-right">
+        <div class="stat-card">
+          <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Statistical Tests</div>
+          ${makeTestRow("Mann-Whitney U", "Are query scores shifted?", data.stats.mw_pvalue)}
+          ${makeTestRow("Kolmogorov-Smirnov", "Do distributions differ?", data.stats.ks_pvalue)}
+          ${makeTestRow("Chi-squared", "TRUE/FALSE enrichment", data.stats.chi2_pvalue)}
+        </div>
       </div>
+
     </div>`;
 
   panel.appendChild(section);
@@ -1263,118 +1259,44 @@ function renderPsauron(data, panel) {
     }
   });
 
-  // ── Download PNG — composite chart + legend onto an offscreen canvas ──
+  // ── Download PNG (with legend) ──
   document.getElementById("dl-kde-png").addEventListener("click", () => {
     const chartCanvas = document.getElementById("psauron-kde-canvas");
-    const cw = chartCanvas.width;
-    const ch = chartCanvas.height;
-
-    // Legend config
     const legendItems = [
       { color: "rgba(61,122,58,0.85)",  label: `Whole Genome (n=${data.pop_n.toLocaleString()})` },
-      { color: "rgba(232,184,75,0.95)", label: `Query (n=${data.query_n.toLocaleString()})` },
+      { color: "rgba(232,184,75,0.95)", label: `Query (n=${data.query_n.toLocaleString()}${data.query_missing > 0 ? `, ${data.query_missing} not found` : ""})` },
     ];
-    const legPad = 16, swatchW = 22, swatchH = 4, gap = 8, fontSize = 13;
-    const legRowH = 22;
-    const legH = legPad * 2 + legendItems.length * legRowH;
-
-    const out = document.createElement("canvas");
-    out.width  = cw;
-    out.height = ch + legH;
-    const octx = out.getContext("2d");
-
-    // White background
-    octx.fillStyle = "#ffffff";
-    octx.fillRect(0, 0, out.width, out.height);
-
-    // Chart
-    octx.drawImage(chartCanvas, 0, 0);
-
-    // Legend below chart
-    octx.font = `${fontSize}px 'Instrument Sans', sans-serif`;
-    octx.textBaseline = "middle";
-    let lx = legPad;
-    const ly0 = ch + legPad;
-    legendItems.forEach((item, i) => {
-      const ly = ly0 + i * legRowH + legRowH / 2;
-      // Swatch (line)
-      octx.strokeStyle = item.color;
-      octx.fillStyle   = item.color;
-      octx.lineWidth   = 3;
-      const swatchY = ly;
-      octx.beginPath();
-      octx.moveTo(lx, swatchY);
-      octx.lineTo(lx + swatchW, swatchY);
-      octx.stroke();
-      // Label
-      octx.fillStyle = "#333";
-      octx.fillText(item.label, lx + swatchW + gap, ly);
+    const legendH = 36;
+    const offscreen = document.createElement("canvas");
+    offscreen.width  = chartCanvas.width;
+    offscreen.height = chartCanvas.height + legendH;
+    const ctx2 = offscreen.getContext("2d");
+    ctx2.fillStyle = "#ffffff";
+    ctx2.fillRect(0, 0, offscreen.width, offscreen.height);
+    ctx2.drawImage(chartCanvas, 0, 0);
+    // Draw legend below chart
+    const startY = chartCanvas.height + legendH / 2;
+    const swatchW = 22, swatchH = 4, gap = 8, itemGap = 32;
+    ctx2.font = "13px 'Instrument Sans', sans-serif";
+    let x = 16;
+    legendItems.forEach(item => {
+      ctx2.fillStyle = item.color;
+      ctx2.beginPath();
+      ctx2.roundRect(x, startY - swatchH / 2, swatchW, swatchH, 2);
+      ctx2.fill();
+      x += swatchW + gap;
+      ctx2.fillStyle = "#333";
+      ctx2.fillText(item.label, x, startY + 5);
+      x += ctx2.measureText(item.label).width + itemGap;
     });
-
     const a = document.createElement("a");
-    a.href = out.toDataURL("image/png");
+    a.href = offscreen.toDataURL("image/png");
     a.download = `psauron_kde_${data.genotype}.png`;
     a.click();
   });
 
-  // ── Download SVG (PSAURON KDE) ──
-  document.getElementById("dl-kde-svg").addEventListener("click", () => {
-    const chartCanvas = document.getElementById("psauron-kde-canvas");
-    const W = chartCanvas.width, H = chartCanvas.height;
-    const pad = { top: 30, right: 20, bottom: 50, left: 55 };
-    const plotW = W - pad.left - pad.right;
-    const plotH = H - pad.top  - pad.bottom;
-
-    const xMin = Math.min(...data.x_grid), xMax = Math.max(...data.x_grid);
-    const allY = [...data.pop_kde_y, ...data.query_kde_y];
-    const yMax = Math.max(...allY) * 1.08;
-
-    const px = v => pad.left + (v - xMin) / (xMax - xMin) * plotW;
-    const py = v => pad.top  + plotH - (v / yMax) * plotH;
-
-    const lineData = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${px(data.x_grid[i]).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
-    const areaData = (arr) => lineData(arr) + ` L${px(xMax).toFixed(1)},${py(0).toFixed(1)} L${px(xMin).toFixed(1)},${py(0).toFixed(1)} Z`;
-
-    const nTicks = 11;
-    const tickStep = (xMax - xMin) / (nTicks - 1);
-    const xTicks = Array.from({length: nTicks}, (_, i) => xMin + i * tickStep);
-    const yTickCount = 5;
-    const yTicks = Array.from({length: yTickCount + 1}, (_, i) => i * yMax / yTickCount);
-
-    const legItems = [
-      { color: "rgba(61,122,58,0.85)",  label: `Whole Genome (n=${data.pop_n.toLocaleString()})` },
-      { color: "rgba(232,184,75,0.95)", label: `Query (n=${data.query_n.toLocaleString()})` },
-    ];
-    const legY = pad.top + plotH + 44;
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + 50}" font-family="Arial, sans-serif">
-  <rect width="${W}" height="${H + 50}" fill="white"/>
-  <defs><clipPath id="plot-clip"><rect x="${pad.left}" y="${pad.top}" width="${plotW}" height="${plotH}"/></clipPath></defs>
-  ${yTicks.map(v => `<line x1="${pad.left}" y1="${py(v).toFixed(1)}" x2="${pad.left+plotW}" y2="${py(v).toFixed(1)}" stroke="#e8e4da" stroke-dasharray="3,3"/>`).join("\n  ")}
-  <path d="${areaData(data.pop_kde_y)}"   fill="rgba(61,122,58,0.12)"  clip-path="url(#plot-clip)"/>
-  <path d="${areaData(data.query_kde_y)}" fill="rgba(232,184,75,0.20)" clip-path="url(#plot-clip)"/>
-  <path d="${lineData(data.pop_kde_y)}"   fill="none" stroke="rgba(61,122,58,0.85)"  stroke-width="2"   clip-path="url(#plot-clip)"/>
-  <path d="${lineData(data.query_kde_y)}" fill="none" stroke="rgba(232,184,75,0.95)" stroke-width="2.5" clip-path="url(#plot-clip)"/>
-  <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+plotH}" stroke="#ccc"/>
-  <line x1="${pad.left}" y1="${pad.top+plotH}" x2="${pad.left+plotW}" y2="${pad.top+plotH}" stroke="#ccc"/>
-  ${xTicks.map(v => `<line x1="${px(v).toFixed(1)}" y1="${pad.top+plotH}" x2="${px(v).toFixed(1)}" y2="${pad.top+plotH+4}" stroke="#999"/>
-  <text x="${px(v).toFixed(1)}" y="${pad.top+plotH+16}" text-anchor="middle" font-size="11" fill="#555">${v.toFixed(1)}</text>`).join("\n  ")}
-  ${yTicks.map(v => `<line x1="${pad.left-4}" y1="${py(v).toFixed(1)}" x2="${pad.left}" y2="${py(v).toFixed(1)}" stroke="#999"/>
-  <text x="${pad.left-8}" y="${py(v).toFixed(1)}" dominant-baseline="middle" text-anchor="end" font-size="11" fill="#555">${v.toFixed(2)}</text>`).join("\n  ")}
-  <text x="${pad.left + plotW/2}" y="${pad.top+plotH+34}" text-anchor="middle" font-size="13" fill="#444">PSAURON Score</text>
-  <text x="${-(pad.top+plotH/2)}" y="14" transform="rotate(-90)" text-anchor="middle" font-size="13" fill="#444">Density</text>
-  ${legItems.map((it, i) => `<line x1="${pad.left + i*170}" y1="${legY}" x2="${pad.left + i*170 + 22}" y2="${legY}" stroke="${it.color}" stroke-width="3"/>
-  <text x="${pad.left + i*170 + 28}" y="${legY}" dominant-baseline="middle" font-size="12" fill="#333">${it.label}</text>`).join("\n  ")}
-</svg>`;
-
-    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `psauron_kde_${data.genotype}.svg`;
-    a.click();
-  });
-
-  // ── Download TSV (PSAURON) ──
+  // ── Download TSV ──
+  document.getElementById("dl-stats-tsv").addEventListener("click", () => {
     const s = data.stats;
     const rows = [
       ["Metric", "Query", "Population"],
@@ -1423,33 +1345,31 @@ function renderPhylostratr(data, container) {
     <div class="chart-header">
       <div class="chart-title">Phylostratr Classification — ${data.genotype} Genome</div>
       <div class="chart-actions">
-        <button class="dl-btn" id="dl-phylo-png">⬇ PNG</button>
-        <button class="dl-btn" id="dl-phylo-svg">⬇ SVG</button>
-        <button class="dl-btn" id="dl-phylo-tsv">⬇ TSV</button>
+        <button class="dl-btn" id="dl-phylo-png">⬇ Download PNG</button>
+        <button class="dl-btn" id="dl-phylo-tsv">⬇ Download TSV</button>
       </div>
     </div>
 
-    <div class="psauron-split">
-      <!-- LEFT: bar chart -->
-      <div class="psauron-left">
-        <div class="kde-wrap">
-          <div class="stat-card-title">Stratum Distribution — Query vs Whole Genome (%)</div>
-          <canvas id="phylo-bar-canvas"></canvas>
-          <div class="kde-legend" style="margin-top:0.75rem;">
-            <div class="kde-legend-item">
-              <div class="kde-swatch" style="background:rgba(61,122,58,0.75)"></div>
-              <span>Whole Genome (n=${data.pop_total.toLocaleString()})</span>
-            </div>
-            <div class="kde-legend-item">
-              <div class="kde-swatch" style="background:rgba(232,184,75,0.9)"></div>
-              <span>Query (n=${data.query_total.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
-            </div>
-          </div>
+    <!-- FIGURE: full width on top -->
+    <div class="kde-wrap" style="margin-bottom:1.25rem;">
+      <div class="stat-card-title">Stratum Distribution — Query vs Whole Genome (%)</div>
+      <canvas id="phylo-bar-canvas"></canvas>
+      <div class="kde-legend" style="margin-top:0.75rem;">
+        <div class="kde-legend-item">
+          <div class="kde-swatch" style="background:rgba(61,122,58,0.75)"></div>
+          <span>Whole Genome (n=${data.pop_total.toLocaleString()})</span>
+        </div>
+        <div class="kde-legend-item">
+          <div class="kde-swatch" style="background:rgba(232,184,75,0.9)"></div>
+          <span>Query (n=${data.query_total.toLocaleString()}${data.query_missing > 0 ? `, <em>${data.query_missing} not found</em>` : ""})</span>
         </div>
       </div>
+    </div>
 
-      <!-- RIGHT: stat cards -->
-      <div class="psauron-right">
+    <!-- SUMMARY TABLES: side by side below the figure -->
+    <div class="psauron-split">
+
+      <div class="psauron-left">
         <div class="stat-card">
           <div class="stat-card-title" style="border-bottom:2px solid var(--green);padding-bottom:0.4rem;margin-bottom:0.85rem;">Statistical Test</div>
           <div class="stat-row">
@@ -1457,8 +1377,10 @@ function renderPhylostratr(data, container) {
             <span class="stat-val ${sig ? 'sig' : 'ns'}" style="font-size:0.85rem;">p = ${data.chi2_pvalue.toExponential(3)}<br><small style="font-size:0.75rem;">${sig ? "✓ significant" : "ns"}</small></span>
           </div>
         </div>
+      </div>
 
-        <div class="stat-card" style="margin-top:1rem;">
+      <div class="psauron-right">
+        <div class="stat-card">
           <div class="stat-card-title" style="display:flex;justify-content:space-between;align-items:baseline;">
             <span style="border-bottom:2px solid var(--green);padding-bottom:0.3rem;">Stratum Counts</span>
             <span style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:400;color:#888;">Your genes / Whole Genome</span>
@@ -1482,6 +1404,7 @@ function renderPhylostratr(data, container) {
           }).join("")}
         </div>
       </div>
+
     </div>`;
 
   container.appendChild(section);
@@ -1542,73 +1465,39 @@ function renderPhylostratr(data, container) {
     }
   });
 
-  // ── Download PNG ──
+  // ── Download PNG (with legend) ──
   document.getElementById("dl-phylo-png").addEventListener("click", () => {
-    const a = document.createElement("a");
-    a.href = document.getElementById("phylo-bar-canvas").toDataURL("image/png");
-    a.download = `phylostratr_${data.genotype}.png`;
-    a.click();
-  });
-
-  // ── Download SVG (Phylostratr) ──
-  document.getElementById("dl-phylo-svg").addEventListener("click", () => {
     const chartCanvas = document.getElementById("phylo-bar-canvas");
-    const W = chartCanvas.width, H = chartCanvas.height;
-    const pad = { top: 20, right: 20, bottom: 70, left: 55 };
-    const plotW = W - pad.left - pad.right;
-    const plotH = H - pad.top  - pad.bottom;
-
-    const labels  = data.strata.map(s => s.name);
-    const popPct  = data.strata.map(s => s.pop_pct);
-    const queryPct = data.strata.map(s => s.query_pct);
-    const yMax = Math.max(...popPct, ...queryPct) * 1.12;
-    const n = labels.length;
-
-    const groupW = plotW / n;
-    const barW   = groupW * 0.35;
-    const py = v => pad.top + plotH - (v / yMax) * plotH;
-
-    const yTickCount = 5;
-    const yTicks = Array.from({length: yTickCount + 1}, (_, i) => i * yMax / yTickCount);
-
-    const legItems = [
+    const legendItems = [
       { color: "rgba(61,122,58,0.75)",  label: `Whole Genome (n=${data.pop_total.toLocaleString()})` },
-      { color: "rgba(232,184,75,0.9)",  label: `Query (n=${data.query_total.toLocaleString()})` },
+      { color: "rgba(232,184,75,0.9)",  label: `Query (n=${data.query_total.toLocaleString()}${data.query_missing > 0 ? `, ${data.query_missing} not found` : ""})` },
     ];
-    const legY = pad.top + plotH + 58;
-
-    const bars = labels.map((lbl, i) => {
-      const cx   = pad.left + i * groupW + groupW / 2;
-      const ph   = (popPct[i]   / yMax) * plotH;
-      const qh   = (queryPct[i] / yMax) * plotH;
-      const px1  = cx - barW - 1;
-      const px2  = cx + 1;
-      // x-axis label — rotate 35°
-      const lx = pad.left + i * groupW + groupW / 2;
-      const ly = pad.top + plotH + 6;
-      return `
-  <rect x="${px1.toFixed(1)}" y="${(pad.top+plotH-ph).toFixed(1)}" width="${barW.toFixed(1)}" height="${ph.toFixed(1)}" fill="rgba(61,122,58,0.65)" stroke="rgba(61,122,58,0.9)" stroke-width="1"/>
-  <rect x="${px2.toFixed(1)}" y="${(pad.top+plotH-qh).toFixed(1)}" width="${barW.toFixed(1)}" height="${qh.toFixed(1)}" fill="rgba(232,184,75,0.75)" stroke="rgba(232,184,75,0.95)" stroke-width="1"/>
-  <text x="${lx.toFixed(1)}" y="${ly}" transform="rotate(35,${lx.toFixed(1)},${ly})" font-size="10" fill="#555">${lbl}</text>`;
-    }).join("");
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + 50}" font-family="Arial, sans-serif">
-  <rect width="${W}" height="${H + 50}" fill="white"/>
-  ${yTicks.map(v => `<line x1="${pad.left}" y1="${py(v).toFixed(1)}" x2="${pad.left+plotW}" y2="${py(v).toFixed(1)}" stroke="#e8e4da" stroke-dasharray="3,3"/>
-  <line x1="${pad.left-4}" y1="${py(v).toFixed(1)}" x2="${pad.left}" y2="${py(v).toFixed(1)}" stroke="#999"/>
-  <text x="${pad.left-8}" y="${py(v).toFixed(1)}" dominant-baseline="middle" text-anchor="end" font-size="11" fill="#555">${v.toFixed(1)}%</text>`).join("\n  ")}
-  <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+plotH}" stroke="#ccc"/>
-  <line x1="${pad.left}" y1="${pad.top+plotH}" x2="${pad.left+plotW}" y2="${pad.top+plotH}" stroke="#ccc"/>
-  ${bars}
-  <text x="${-(pad.top+plotH/2)}" y="14" transform="rotate(-90)" text-anchor="middle" font-size="13" fill="#444">% of genes</text>
-  ${legItems.map((it, i) => `<rect x="${pad.left + i*190}" y="${legY - 6}" width="18" height="12" fill="${it.color}"/>
-  <text x="${pad.left + i*190 + 24}" y="${legY}" dominant-baseline="middle" font-size="12" fill="#333">${it.label}</text>`).join("\n  ")}
-</svg>`;
-
-    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const legendH = 36;
+    const offscreen = document.createElement("canvas");
+    offscreen.width  = chartCanvas.width;
+    offscreen.height = chartCanvas.height + legendH;
+    const ctx2 = offscreen.getContext("2d");
+    ctx2.fillStyle = "#ffffff";
+    ctx2.fillRect(0, 0, offscreen.width, offscreen.height);
+    ctx2.drawImage(chartCanvas, 0, 0);
+    // Draw legend below chart
+    const startY = chartCanvas.height + legendH / 2;
+    const swatchW = 22, swatchH = 4, gap = 8, itemGap = 32;
+    ctx2.font = "13px 'Instrument Sans', sans-serif";
+    let x = 16;
+    legendItems.forEach(item => {
+      ctx2.fillStyle = item.color;
+      ctx2.beginPath();
+      ctx2.roundRect(x, startY - swatchH / 2, swatchW, swatchH, 2);
+      ctx2.fill();
+      x += swatchW + gap;
+      ctx2.fillStyle = "#333";
+      ctx2.fillText(item.label, x, startY + 5);
+      x += ctx2.measureText(item.label).width + itemGap;
+    });
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `phylostratr_${data.genotype}.svg`;
+    a.href = offscreen.toDataURL("image/png");
+    a.download = `phylostratr_${data.genotype}.png`;
     a.click();
   });
 

@@ -16,7 +16,7 @@ B73_ONTOLOGY_FILES = {
     "gomap":      f"{B73_DIR}/gomap_go_v5.tsv",
     "entapgo":    f"{B73_DIR}/entap_go_v5.tsv",
     "pannzergo":  f"{B73_DIR}/pannzer_go_v5.tsv",
-    "goexpanded": f"{B73_DIR}/expanded.tsv",
+    "goexpanded": f"{B73_DIR}/expanded_go.tsv",
     "entapkegg":  f"{B73_DIR}/entap_kegg_v5.tsv",
     "metacyc":    f"{B73_DIR}/corncyc_v5.tsv",
     "reactome":   f"{B73_DIR}/reactome_v5.tsv",
@@ -47,7 +47,7 @@ NON_B73_GENOTYPES = [
 NON_B73_ONTOLOGY_TEMPLATES = {
     "pannzergo":  "{genotype}_pannzer_go.tsv",
     "entapgo":    "{genotype}_entap_go.tsv",
-    "goexpanded": "{genotype}_expanded.tsv",
+    "goexpanded": "{genotype}_expanded_go.tsv",
     "pannzerec":  "{genotype}_pannzer_enzyme_commission.tsv",
     "pfam":       "{genotype}_pfam.tsv",
     "deeploc":    "{genotype}_deeploc.tsv",
@@ -175,6 +175,56 @@ def index():
 @app.route("/nonb73", methods=["GET"])
 def nonb73():
     return render_template("nonb73.html")
+
+
+@app.route("/rnaseq", methods=["GET"])
+def rnaseq():
+    return render_template("rnaseq.html")
+
+
+@app.route("/rnaseq_studies", methods=["GET"])
+def rnaseq_studies():
+    import os, csv
+    studies_file = "./data/rnaseq_studies.txt"
+    try:
+        studies = []
+        try:
+            fh = open(studies_file, newline="", encoding="utf-8")
+        except UnicodeDecodeError:
+            fh = open(studies_file, newline="", encoding="latin-1")
+        with fh:
+            reader = csv.DictReader(fh, delimiter="\t")
+            for row in reader:
+                studies.append({
+                    "filename":     row.get("Filename",     "").strip(),
+                    "display_name": row.get("Display Name", "").strip(),
+                    "genotype":     row.get("Genotype",     "").strip(),
+                    "curation":     row.get("Curation Set", "").strip(),
+                    "tissue":       row.get("Tissue",       "").strip(),
+                    "condition":    row.get("Condition",    "").strip(),
+                })
+        return jsonify({"studies": studies})
+    except FileNotFoundError:
+        return jsonify({"error": f"rnaseq_studies.txt not found at {studies_file}"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/rnaseq_file/<path:filename>", methods=["GET"])
+def rnaseq_file(filename):
+    import os
+    # Sanitise — only allow filenames with no directory separators
+    safe = os.path.basename(filename)
+    filepath = os.path.join("./data/rnaseq", safe)
+    if not os.path.isfile(filepath):
+        return jsonify({"error": f"File not found: {safe}"}), 404
+    try:
+        with open(filepath, encoding="utf-8") as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        with open(filepath, encoding="latin-1") as f:
+            content = f.read()
+    return content, 200, {"Content-Type": "text/plain; charset=utf-8"}
 
 
 @app.route("/analytics", methods=["GET"])
