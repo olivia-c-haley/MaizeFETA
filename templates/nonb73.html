@@ -886,9 +886,9 @@
           <label><input type="checkbox" name="analysis" value="go"> GO Terms</label>
           <select name="go-ontology" disabled>
             <option value="" disabled selected hidden>Select ontology…</option>
-            <option value="pannzergo">Pannzer Ontology</option>
-            <option value="entapgo">EnTAP Ontology</option>
-            <option value="goexpanded">Expanded Ontology</option>
+            <option value="pannzergo">PANNZER</option>
+            <option value="entapgo">EnTAP</option>
+            <option value="goexpanded">Expanded GO Annotations</option>
           </select>
         </div>
 
@@ -896,7 +896,7 @@
           <label><input type="checkbox" name="analysis" value="ec"> Enzyme (EC)</label>
           <select name="ec-ontology" disabled>
             <option value="" disabled selected hidden>Select ontology…</option>
-            <option value="pannzerec">Pannzer EC</option>
+            <option value="pannzerec">PANNZER</option>
           </select>
         </div>
 
@@ -904,8 +904,8 @@
           <label><input type="checkbox" name="analysis" value="domain"> Protein Domains</label>
           <select name="domain-ontology" disabled>
             <option value="" disabled selected hidden>Select ontology…</option>
-            <option value="pfam">Pfam</option>
-            <option value="interproscan">InterProScan</option>
+            <option value="pfam">Pfam Domains</option>
+            <option value="interproscan">InterProScan Domains</option>
           </select>
         </div>
 
@@ -990,11 +990,11 @@ const exampleGenes = [
 ];
 
 const ONTOLOGY_LABELS = {
-  gomap: "GOMAP GO", entapgo: "EnTAP GO", pannzergo: "Pannzer GO", goexpanded: "GO Expanded",
+  gomap: "GOMAP", entapgo: "EnTAP", pannzergo: "PANNZER", goexpanded: "Expanded GO Annotations",
   entapkegg: "KEGG", metacyc: "CornCyc", reactome: "Reactome",
-  pannzerec: "Pannzer EC", e2p2ec: "E2P2 EC", ecexpanded: "EC Expanded",
+  pannzerec: "PANNZER", e2p2ec: "E2P2", ecexpanded: "Expanded E.C. Annotations",
   pfam: "Protein Domains",
-  deeploc: "Subcellular Localization", interproscan: "InterProScan"
+  deeploc: "Subcellular Localization", interproscan: "InterProScan Domains"
 };
 
 const genesArea = document.getElementById("genes");
