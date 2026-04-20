@@ -5,23 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Sources — FETA</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
+  <script type='text/javascript' src='https://maizegdb.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-3o5b4z/b/5/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=883299e6'></script>
+<style>
     :root {
       --ink: #1c1c14;
       --paper: #f4f2eb;
       --cream: #f0ead8;
       --gold: #e8b84b;
       --gold-dark: #c49428;
-      --peach: #e8a882;
-      --peach-pale: #f5ddd0;
-      --sky: #89c4d4;
       --sky-pale: #d8eff5;
       --sky-dark: #4a9ab0;
       --green: #407F3D;
       --green-dark: #2e5c2c;
-      --green-light: #5a9e57;
       --green-pale: #d6ecd5;
-      --red-soft: #c44a3a;
       --border: #d4cebc;
       --shadow: rgba(45, 92, 44, 0.14);
     }
@@ -41,11 +37,16 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 2.5rem;
+      padding: 0.5rem 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-logos {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .nav-brand { display: flex; align-items: center; gap: 0.6rem; }
     .nav-brand-logo { height: 32px; width: auto; }
@@ -77,14 +78,6 @@
       pointer-events: none;
     }
     .hero-inner { position: relative; z-index: 1; }
-    .hero-eyebrow {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 1rem;
-    }
     .hero h1 {
       font-family: 'Instrument Sans', sans-serif;
       font-size: clamp(2rem, 5vw, 3.2rem);
@@ -246,28 +239,36 @@
 
     /* ── FOOTER ── */
     footer {
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.78rem;
-      color: #888;
-      border-top: 1px solid var(--border);
-      background: var(--cream);
+      background: var(--green-dark); color: rgba(255,255,255,0.5);
+      padding: 1.25rem 2.5rem; font-size: 0.8rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
     }
+    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-right { display: flex; gap: 1.5rem; }
   </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-brand">
-    <img class="nav-brand-logo"
-         src="{{ url_for('static', filename='images/feta_banner.png') }}"
-         alt="FETA">
+  <div class="nav-logos">
+    <a class="nav-brand" href="https://www.maizegdb.org">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/mgdb_logo_small.png') }}"
+          alt="MGDB">
+    </a>
+    <a class="nav-brand" href="/">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/feta_words_transparent.png') }}"
+          alt="FETA">
+    </a>
   </div>
   <div class="nav-links">
-    <a href="/">B73 Enrichment</a>
+    <a href="/">Home</a>
+    <a href="/index">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
-    <a href="/rnaseq">RNA-seq Analysis</a>
+    <a href="/rnaseq">RNA-Seq Analysis</a>
     <a href="/data-sources" class="active">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -275,8 +276,7 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">Reference</div>
-    <h1>Data <em>Sources</em></h1>
+    <h1>Data<br><em>Sources</em></h1>
     <p class="hero-sub">Annotation databases, tools, and genome assemblies underlying FETA's enrichment analyses.</p>
   </div>
 </div>
@@ -308,53 +308,53 @@
         <tr><td>B73</td><td>Zm00001eb</td><td>Zm-B73-REFERENCE-NAM-5.0</td><td><a href="https://download.maizegdb.org/Zm-B73-REFERENCE-NAM-5.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
 
         <tr><td>B97</td><td>Zm00018ab</td><td>Zm-B97-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-B97-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML52</td><td>Zm00019ab</td><td>Zm-CML52-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML52-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML69</td><td>Zm00020ab</td><td>Zm-CML69-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML69-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML103</td><td>Zm00021ab</td><td>Zm-CML103-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML103-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML228</td><td>Zm00022ab</td><td>Zm-CML228-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML228-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML247</td><td>Zm00023ab</td><td>Zm-CML247-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML247-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML277</td><td>Zm00024ab</td><td>Zm-CML277-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML277-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML322</td><td>Zm00025ab</td><td>Zm-CML322-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML322-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>CML333</td><td>Zm00026ab</td><td>Zm-CML333-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-CML333-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>HP301</td><td>Zm00027ab</td><td>Zm-HP301-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-HP301-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Il14H</td><td>Zm00028ab</td><td>Zm-Il14H-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Il14H-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Ki3</td><td>Zm00029ab</td><td>Zm-Ki3-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ki3-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Ki11</td><td>Zm00030ab</td><td>Zm-Ki11-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ki11-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Ky21</td><td>Zm00031ab</td><td>Zm-Ky21-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ky21-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>M37W</td><td>Zm00032ab</td><td>Zm-M37W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-M37W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>M162W</td><td>Zm00033ab</td><td>Zm-M162W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-M162W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Mo18W</td><td>Zm00034ab</td><td>Zm-Mo18W-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Mo18W-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
-        <tr><td>Ms71</td><td>Zm00035ab</td><td>Zm-Ms71-REFERENCE-NAM-1.0/</td><td><a href="https://download.maizegdb.org/Zm-Ms71-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
+        <tr><td>Ms71</td><td>Zm00035ab</td><td>Zm-Ms71-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Ms71-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
+
         <tr><td>NC350</td><td>Zm00036ab</td><td>Zm-NC350-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-NC350-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>NC358</td><td>Zm00037ab</td><td>Zm-NC358-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-NC358-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Oh7B</td><td>Zm00038ab</td><td>Zm-Oh7B-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Oh7B-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Oh43</td><td>Zm00039ab</td><td>Zm-Oh43-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Oh43-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>P39</td><td>Zm00040ab</td><td>Zm-P39-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-P39-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Tx303</td><td>Zm00041ab</td><td>Zm-Tx303-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Tx303-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
-        
+
         <tr><td>Tzi8</td><td>Zm00042ab</td><td>Zm-Tzi8-REFERENCE-NAM-1.0</td><td><a href="https://download.maizegdb.org/Zm-Tzi8-REFERENCE-NAM-1.0/" style="color:var(--sky-dark);">MaizeGDB Downloads</a></td></tr>
       </tbody>
     </table>
@@ -542,19 +542,19 @@
       <span class="ds-card-name">PSAURON</span>
       <span class="ds-card-tag tag-both">B73 + NAM</span>
       <p class="ds-card-desc">Protein Sequence Assessment Using a Reference ORF Network (PSAURON). Scores for each gene on a 0.0–1.0 scale reflects the likelihood that the sequence is a genuine protein-coding region. </p>
-      <p class="ds-card-cite">Sommer et al.,<em>NAR Genom. Bioinform.</em> 2025 <a href="https://doi.org/10.1093/nargab/lqae189" target="_blank">DOI</a>
+      <p class="ds-card-cite">Sommer et al.,<em>NAR Genom. Bioinform.</em> 2025 <a href="https://doi.org/10.1093/nargab/lqae189" target="_blank">DOI</a></p>
     </div>
 
   </div>
 
   <!-- ─────────────────── RNA-SEQ ─────────────────── -->
-  <h2 class="ds-section-title">RNA-seq Datasets</h2>
+  <h2 class="ds-section-title">RNA-Seq Datasets</h2>
   <div class="ds-grid">
 
     <div class="ds-card">
-      <span class="ds-card-name">Hayford et al. 2024 — MaizeGDB Curated RNA-seq</span>
+      <span class="ds-card-name">Hayford et al. 2024 — MaizeGDB Curated RNA-Seq</span>
       <span class="ds-card-tag tag-b73only">B73 only</span>
-      <p class="ds-card-desc">A curated compendium of maize RNA-seq differential expression datasets aggregated from published studies and deposited in MaizeGDB. Datasets were uniformly processed and mapped to B73 v5 gene models, enabling cross-study comparison of DEGs across diverse tissues, developmental stages, and stress conditions. These datasets underpin the MaizeGDB curated study browser in the RNA-seq Analysis tool.</p>
+      <p class="ds-card-desc">A curated compendium of maize RNA-Seq differential expression datasets aggregated from published studies and deposited in MaizeGDB. Datasets were uniformly processed and mapped to B73 v5 gene models, enabling cross-study comparison of DEGs across diverse tissues, developmental stages, and stress conditions. These datasets underpin the MaizeGDB curated study browser in the RNA-Seq Analysis tool.</p>
       <p class="ds-card-cite">Hayford et al., <em>BMC Genomics</em> 2024 · <a href="https://doi.org/10.1186/s12864-024-10443-7" target="_blank">DOI</a></p>
     </div>
 
@@ -562,8 +562,30 @@
 
 </div><!-- end .ds-body -->
 
-<footer>
-  FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Maize Genetics &amp; Genomics
+<!-- feedback form -->
+<script type="text/javascript">
+  window.ATL_JQ_PAGE_PROPS = {
+    '883299e6': {  // feedback
+      "triggerFunction": function(showCollectorDialog) {
+        //Requires that jQuery is available!
+        jQuery(".feedback-form").click(function(e) {
+          e.preventDefault();
+          showCollectorDialog();
+        });
+      },
+      fieldValues: {
+        recordWebInfo: '1', // field Name
+        recordWebInfoConsent: ['1'] // field Id
+      }
+    }
+  };
+</script>
+
+<footer style="margin-top:2rem;">
+  <span>FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Hosted by <a href="https://maizegdb.org" target="_blank">MaizeGDB</a></span>
+  <div class="footer-right">
+    <a href="#!" class="feedback-form">Contact us</a>
+  </div>
 </footer>
 
 </body>

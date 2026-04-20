@@ -8,7 +8,7 @@ from statsmodels.stats.multitest import multipletests
 app = Flask(__name__)
 
 # ── B73 paths ────────────────────────────────────────────────────────────────
-B73_DIR = "https://ftpprivate.maizegdb.org/feta/data/B73"
+B73_DIR = "ftpprivate.maizegdb.org/data/B73"
 
 B73_GENE_MODEL_FILE = f"{B73_DIR}/B73.tsv"
 
@@ -33,7 +33,7 @@ B73_ONTOLOGY_FILES = {
 }
 
 # ── Non-B73 paths ─────────────────────────────────────────────────────────────
-NON_B73_DIR = "https://ftpprivate.maizegdb.org/feta/data/nonB73"
+NON_B73_DIR = "ftpprivate.maizegdb.org/data/nonB73"
 
 NON_B73_GENOTYPES = [
     "B97","CML52","CML69","CML103","CML228","CML247","CML277",
@@ -55,7 +55,7 @@ NON_B73_ONTOLOGY_TEMPLATES = {
 }
 
 
-# ── Genotype prefix lookup (loaded lazily from data/genotypes.txt) ───────────
+# ── Genotype prefix lookup (loaded lazily from ftpprivate.maizegdb.org/data/genotypes.txt) ───────────
 _GENOTYPE_PREFIXES = None
 
 def get_genotype_prefixes():
@@ -63,7 +63,7 @@ def get_genotype_prefixes():
     global _GENOTYPE_PREFIXES
     if _GENOTYPE_PREFIXES is None:
         try:
-            df = pd.read_csv("https://ftpprivate.maizegdb.org/feta/data/genotypes.txt", sep="\t")
+            df = pd.read_csv("ftpprivate.maizegdb.org/data/genotypes.txt", sep="\t")
             _GENOTYPE_PREFIXES = dict(zip(df["PREFIX"], df["GENOTYPE"]))
         except Exception as e:
             print(f"WARNING: could not load genotypes.txt: {e}")
@@ -168,6 +168,11 @@ def run_enrichment(classification_file, query_genes, background_genes, p_value_t
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 @app.route("/", methods=["GET"])
+def landing():
+    return render_template("landing.html")
+
+
+@app.route("/index", methods=["GET"])
 def index():
     return render_template("index.html")
 
@@ -185,7 +190,7 @@ def rnaseq():
 @app.route("/rnaseq_studies", methods=["GET"])
 def rnaseq_studies():
     import os, csv
-    studies_file = "https://ftpprivate.maizegdb.org/feta/data/rnaseq_studies.txt"
+    studies_file = "ftpprivate.maizegdb.org/data/rnaseq_studies.txt"
     try:
         studies = []
         try:
@@ -215,7 +220,7 @@ def rnaseq_file(filename):
     import os
     # Sanitise — only allow filenames with no directory separators
     safe = os.path.basename(filename)
-    filepath = os.path.join("https://ftpprivate.maizegdb.org/feta/data/rnaseq", safe)
+    filepath = os.path.join("ftpprivate.maizegdb.org/data/rnaseq", safe)
     if not os.path.isfile(filepath):
         return jsonify({"error": f"File not found: {safe}"}), 404
     try:
@@ -584,4 +589,4 @@ def upload_nonb73():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

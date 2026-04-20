@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FETA — Functional Enrichment Term Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type='text/javascript' src='https://maizegdb.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-3o5b4z/b/5/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=883299e6'></script>
+  <style>
+    :root {
+      --ink:         #1c1c14;
+      --paper:       #f4f2eb;
+      --cream:       #f0ead8;
+      --gold:        #e8b84b;
+      --gold-dark:   #c49428;
+      --sky-pale:    #d8eff5;
+      --sky-dark:    #4a9ab0;
+      --green:       #407F3D;
+      --green-dark:  #2e5c2c;
+      --green-light: #5a9e57;
+      --green-pale:  #d6ecd5;
+      --border:      #d4cebc;
+      --shadow:      rgba(45,92,44,0.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Instrument Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--green);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 2rem;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+    .nav-brand-logo { height: 32px; width: auto; }
+    .nav-brand-text { font-family: 'Instrument Sans', sans-serif; color: var(--cream); font-size: 0.8rem; letter-spacing: 0.04em; opacity: 0.85; line-height: 1.3; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a { color: rgba(255,255,255,0.72); text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 6px; transition: background 0.2s, color 0.2s; }
+    .nav-links a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-links a.active { background: var(--sky-dark); color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, #3a6e37 60%, #407F3D 100%);
+      padding: 3.5rem 2.5rem 3rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 700px; margin: 0 auto;
+      text-align: center;
+    }
+    .hero-left { opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s; display: flex; flex-direction: column; align-items: center; }
+    .hero-logo { max-height: 80px; width: auto; margin-bottom: 1rem; display: block; }
+    .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.75rem; }
+    .hero h1 { font-family: 'Instrument Sans', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--cream); line-height: 1.2; margin-bottom: 0.75rem; }
+    .hero h1 em { color: var(--gold); font-style: italic; }
+    .hero-sub { color: rgba(255,255,255,0.65); font-size: 1rem; line-height: 1.6; max-width: 480px; margin-bottom: 1.5rem; text-align: center; }
+    .hero-meta { display: flex; gap: 1.75rem; justify-content: center; }
+    .hero-meta-item { display: flex; flex-direction: column; align-items: center; }
+    .hero-meta-num { font-family: 'DM Mono', monospace; font-size: 1.05rem; color: var(--gold); font-weight: 500; }
+    .hero-meta-label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-top: 0.1rem; }
+
+    /* ── TOOL BUTTONS ── */
+
+    .tool-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 8px; padding: 0.9rem 1rem;
+      text-decoration: none; display: flex; flex-direction: column; gap: 0.25rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .tool-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--tool-color, var(--green-light)); opacity: 0; transition: opacity 0.15s; }
+    .tool-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+    .tool-btn:hover::before { opacity: 1; }
+    .tool-btn-name { font-size: 0.83rem; font-weight: 600; color: rgba(255,255,255,0.92); line-height: 1.3; }
+    .tool-btn-desc { font-size: 0.7rem; color: rgba(255,255,255,0.42); line-height: 1.35; }
+
+    /* ── CONTENT AREA ── */
+    .content {
+      max-width: 1160px; margin: 0 auto;
+      padding: 2.5rem 2.5rem 0;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2.5rem; align-items: start;
+    }
+
+    /* ── ABOUT ── */
+    .section-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sky-dark); margin-bottom: 0.6rem; }
+    .about-section h2 { font-family: 'Instrument Sans', sans-serif; font-size: 1.45rem; font-weight: 600; color: var(--green-dark); line-height: 1.3; margin-bottom: 1rem; }
+    .about-section p { font-size: 0.925rem; color: #444; line-height: 1.75; margin-bottom: 0.85rem; }
+    .about-section p:last-of-type { margin-bottom: 0; }
+    .about-section a { color: var(--sky-dark); text-decoration: none; font-weight: 500; }
+    .about-section a:hover { text-decoration: underline; }
+    .sidebar h3 { font-family: 'Instrument Sans', sans-serif; font-size: 1.45rem; font-weight: 600; color: var(--green-dark); line-height: 1.3; margin-bottom: 1rem; }
+
+    /* ── TOOL CARDS (below fold) ── */
+    .tool-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .tool-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.1rem; text-decoration: none; color: var(--ink);
+      display: flex; flex-direction: column; gap: 0.25rem;
+      transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .tool-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--tool-color, var(--green)); opacity: 0; transition: opacity 0.15s; }
+    .tool-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); border-color: var(--green-light); }
+    .tool-card:hover::before { opacity: 1; }
+    .tool-card-name { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); line-height: 1.3; }
+    .tool-card-desc { font-size: 0.75rem; color: #777; line-height: 1.4; }
+
+    /* ── CITATION BANNER ── */
+    .cite-banner {
+      max-width: 1160px; margin: 2.5rem auto 0;
+      padding: 1rem 1.25rem;
+      background: var(--cream); border: 1px solid var(--border);
+      border-left: 4px solid var(--gold); border-radius: 8px;
+    }
+    .cite-banner-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 0.35rem; }
+    .cite-banner p { font-size: 0.82rem; color: #555; line-height: 1.6; }
+    .cite-banner em { font-style: italic; }
+    .cite-banner a { color: var(--sky-dark); font-weight: 500; text-decoration: none; }
+    .cite-banner a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--green-dark); color: rgba(255,255,255,0.5);
+      padding: 1.25rem 2.5rem; font-size: 0.8rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-right { display: flex; gap: 1.5rem; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 900px) {
+      .hero-inner, .content { grid-template-columns: 1fr; }
+      .hero-inner { gap: 2rem; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 0.5rem 1rem; }
+      .nav-links a { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+      .hero { padding: 2.5rem 1.25rem 2rem; }
+      .content { padding: 2rem 1.25rem 3rem; }
+      .tool-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="https://maizegdb.org" target="_blank">
+    <img class="nav-brand-logo" src="{{ url_for('static', filename='images/mgdb_logo_small.png') }}" alt="MaizeGDB">
+  </a>
+  <div class="nav-links">
+    <a href="/" class="active">Home</a>
+    <a href="/index">B73 Enrichment</a>
+    <a href="/nonb73">Non-B73 Enrichment</a>
+    <a href="/analytics">Other Analytics</a>
+    <a href="/rnaseq">RNA-Seq Analysis</a>
+    <a href="/data-sources">Data Sources</a>
+    <a href="/faq">FAQ</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <img src="{{ url_for('static', filename='images/feta_banner_transparent.png') }}" alt="FETA" class="hero-logo">
+      <h1>Functional Enrichment<br><em>Term Analysis</em></h1>
+      <p class="hero-sub">A suite of tools for exploring gene functional enrichment <br>in <em style="color:var(--gold);font-style:italic;">Zea mays</em> and related species.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <div class="hero-meta-num">46,430</div>
+          <div class="hero-meta-label">B73 genes</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-num">26</div>
+          <div class="hero-meta-label">Genomes</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-num">8+</div>
+          <div class="hero-meta-label">Ontologies</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-num">Free</div>
+          <div class="hero-meta-label">Open access</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="content">
+  <div class="about-section">
+    <h2>About <em>FETA</em></h2>
+    <p>
+      FETA (Functional Enrichment Term Analysis) is a web-based platform developed to support
+      functional genomics research in <em>Zea mays</em>. FETA is a one-stop-shop for performing multiple, 
+      simultaneous enrichments with different ontologies, in the B73 reference proteome and 
+      non-reference proteomes in the Nested Association Mapping (NAM) population. The ontologies 
+      not only focus on biological function (GO terms, Biological Pathway, Metabolic Function, 
+      Protein Domain), but also on uncovering trends in single-cell and subcellular spatial 
+      distribution, gene over-representation at specific loci, and agronomic traits for breeding 
+      efforts. FETA is also designed as a complement to popular transcriptomics pipelines 
+      (EdgeR, DESeq, limma, etc.), allowing users to upload their data (or use one of our pre-loaded 
+      datasets), visualize differentially expressed genes (DEGs), and directly perform 
+      functional enrichment on these subsets – all in one place. 
+    </p>
+    <p>
+      FETA is hosted by the Maize Genetics and Genomics Database (<a href="https://maizegdb.org" target="_blank">MaizeGDB</a>),
+      the community database for maize genetics and genomics. Annotation data is drawn from curated sources
+      at MaizeGDB, including GO terms, KEGG, Reactome, and others. Results can be exported as tables, PNG,
+      or SVG for use in publications. Choose from one of the Available Tools to get started exploring. 
+    </p>
+    <img src="{{ url_for('static', filename='images/mgdb_logo_small_green.png') }}" alt="MaizeGDBLogo" class="hero-logo">
+  </div>
+  <div class="sidebar">
+    <h3>Choose a Tool to Get Started</h3>
+    <div class="section-eyebrow" style="margin-bottom:0.75rem;">Available Tools</div>
+    <div class="tool-card-grid">
+      <a href="/index" class="tool-card" style="--tool-color:var(--green-light);">
+        <span class="tool-card-name">B73 Enrichment Analysis</span>
+        <span class="tool-card-desc">Perform enrichments on B73 gene lists and visualize 
+          results as bar charts, dot plots, and concept networks. Supports various 
+          functional, spatial, loci, and trait ontologies.</span>
+        <img src="{{ url_for('static', filename='images/b73_icon2.svg') }}" class="hero-logo">
+      </a>
+      <a href="/nonb73" class="tool-card" style="--tool-color:var(--sky-dark);">
+        <span class="tool-card-name">Non-B73 Enrichment</span>
+        <span class="tool-card-desc">Enrichment analyses on gene lists from non-reference genomes. 
+          GO term, pathway, and metabolic ontologies are currently supported. </span>
+          <img src="{{ url_for('static', filename='images/nonb73_icon2.svg') }}" class="hero-logo">
+      </a>
+      <a href="/rnaseq" class="tool-card" style="--tool-color:var(--peach);">
+        <span class="tool-card-name">RNA-Seq Analysis</span>
+        <span class="tool-card-desc">Use curated MaizeGDB datasets, or upload your own RNA-Sequencing
+          data to view and perform functional enrichment on differentially expressed genes. Supports 
+          data/experiments on any of the NAM founders. </span>
+        <img src="{{ url_for('static', filename='images/rnaseq_icon.svg') }}" class="hero-logo">
+        </a>
+      <a href="/analytics" class="tool-card" style="--tool-color:var(--gold);">
+        <span class="tool-card-name">Other Analytics</span>
+        <span class="tool-card-desc">Additional tools for gene set analysis beyond standard enrichment.
+          Currently supports studying the distribution of gene evolutionary ages, and protein annotation 
+          assessments for B73 and NAM founder genomes. 
+        </span>
+        <img src="{{ url_for('static', filename='images/otheranalysis_icon.svg') }}" class="hero-logo">
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- CITATION -->
+<div style="max-width:1160px;margin:2rem auto 0;padding:0 2.5rem;">
+  <div class="cite-banner">
+    <div class="cite-banner-label">📖 If you use FETA in your research, please cite:</div>
+    <p>
+      Haley, O.C. et al (2026). <em>FETA: A Modular Framework for Functional Enrichment Term Analysis across Multi-Reference Crop Genomes, 
+        demonstrated in the Maize NAM Panel </em> 
+      <br>
+      <br>
+      See the <a href="/faq">FAQ</a> for full citation details.</p>
+
+  </div>
+</div>
+
+<!-- feedback form -->
+<script type="text/javascript">
+  window.ATL_JQ_PAGE_PROPS = {
+    '883299e6': {  // feedback
+      "triggerFunction": function(showCollectorDialog) {
+        //Requires that jQuery is available! 
+        jQuery(".feedback-form").click(function(e) {
+          e.preventDefault();
+          showCollectorDialog();
+        });
+      },
+      fieldValues: {
+        recordWebInfo: '1', // field Name
+        recordWebInfoConsent: ['1'] // field Id
+      }
+    }
+  };
+</script>
+
+<footer style="margin-top:2rem;">
+  <span>FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Hosted by <a href="https://maizegdb.org" target="_blank">MaizeGDB</a></span>
+  <div class="footer-right">
+    <a href="#!" class="feedback-form">Contact us</a>
+  </div>
+</footer>
+
+</body>
+</html>

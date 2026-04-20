@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FETA — RNA-seq Analysis</title>
+  <title>FETA — RNA-Seq Analysis</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script type='text/javascript' src='https://maizegdb.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-3o5b4z/b/5/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=883299e6'></script>
   <style>
     :root {
       --ink: #1c1c14;
@@ -13,9 +14,7 @@
       --cream: #f0ead8;
       --gold: #e8b84b;
       --gold-dark: #c49428;
-      --peach: #e8a882;
       --peach-pale: #f5ddd0;
-      --sky: #89c4d4;
       --sky-pale: #d8eff5;
       --sky-dark: #4a9ab0;
       --green: #407F3D;
@@ -36,7 +35,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 2.5rem;
+      padding: 0.5rem 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -51,13 +50,10 @@
       height: 32px;
       width: auto;
     }
-    .nav-brand-text {
-      font-family: 'Instrument Sans', sans-serif;
-      color: var(--cream);
-      font-size: 0.8rem;
-      letter-spacing: 0.04em;
-      opacity: 0.85;
-      line-height: 1.3;
+    .nav-logos {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .nav-links { display: flex; gap: 0.25rem; }
     .nav-links a {
@@ -87,14 +83,6 @@
       pointer-events: none;
     }
     .hero-inner { position: relative; z-index: 1; }
-    .hero-eyebrow {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 1rem;
-    }
     .hero h1 {
       font-family: 'Instrument Sans', sans-serif;
       font-size: clamp(2rem, 5vw, 3.2rem);
@@ -264,20 +252,6 @@
     .info-msg { font-size: 0.78rem; color: #777; margin-top: 0.35rem; padding: 0.35rem 0.5rem; background: var(--sky-pale); border-radius: 5px; border: 1px solid var(--sky); display: none; }
     .info-msg.show { display: block; }
 
-    /* send-to section */
-    .send-section { margin-top: 0.75rem; }
-    .send-label { font-size: 0.75rem; color: #666; margin-bottom: 0.4rem; font-weight: 600; }
-    .send-btns { display: flex; gap: 0.4rem; flex-direction: column; }
-    .send-btn {
-      padding: 0.5rem 0.75rem; border-radius: 7px; border: 1px solid var(--border);
-      font-family: 'Instrument Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
-      cursor: pointer; transition: background 0.2s; background: #fff; text-align: left;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .send-btn:hover:not(:disabled) { background: var(--green-pale); border-color: var(--green); }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .send-btn .send-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
     /* ── RESULTS PANEL ── */
     .results-panel { padding: 1.5rem; overflow-y: auto; }
     .results-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; gap: 0.75rem; color: #aaa; text-align: center; }
@@ -304,9 +278,13 @@
     .dl-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
     .chart-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
-    #volcano-svg { display: block; width: 100%; overflow: visible; }
-
-    /* dot tooltip */
+    #volcano-svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+      user-select: none;
+      -webkit-user-select: none;
+    }
     .volcano-tooltip {
       position: fixed; pointer-events: none;
       background: rgba(28,28,20,0.92); color: #fff;
@@ -315,6 +293,46 @@
       white-space: pre; line-height: 1.6;
       z-index: 9999; display: none;
       max-width: 260px; white-space: normal;
+    }
+
+    /* ── VOLCANO GENE HIGHLIGHT ── */
+    .volcano-hl-wrap {
+      display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+      padding: 0.55rem 0.75rem;
+      background: var(--cream); border-top: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+    }
+    .volcano-hl-label {
+      font-size: 0.72rem; font-weight: 600; color: var(--green-dark);
+      font-family: 'Instrument Sans', sans-serif; white-space: nowrap;
+    }
+    .volcano-hl-input {
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      padding: 0.22rem 0.55rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; color: var(--ink); flex: 1; min-width: 180px; max-width: 320px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .volcano-hl-input:focus { border-color: var(--green); }
+    .volcano-hl-input::placeholder { color: #bbb; }
+    .volcano-hl-btn {
+      padding: 0.22rem 0.6rem; font-size: 0.72rem; font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: var(--gold); border: 1px solid var(--gold-dark);
+      border-radius: 6px; cursor: pointer; color: #fff;
+      white-space: nowrap; transition: background 0.15s;
+    }
+    .volcano-hl-btn:hover { background: var(--gold-dark); }
+    .volcano-hl-clear {
+      padding: 0.22rem 0.5rem; font-size: 0.72rem; font-weight: 600;
+      font-family: 'Instrument Sans', sans-serif;
+      background: var(--cream); border: 1px solid var(--border);
+      border-radius: 6px; cursor: pointer; color: #888;
+      transition: background 0.15s;
+    }
+    .volcano-hl-clear:hover { background: var(--border); }
+    .volcano-hl-status {
+      font-size: 0.7rem; color: #888; font-family: 'DM Mono', monospace; white-space: nowrap;
     }
 
     /* ── STATS BAR ── */
@@ -331,58 +349,31 @@
     .stat-chip-val.down { color: #b84800; }
     .stat-chip-val.ns   { color: #999; }
 
-    /* ── GENE TABLE ── */
-    .gene-table-wrap { background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
-    .gene-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
-    .gene-table-title { font-size: 0.95rem; font-weight: 600; color: var(--green-dark); }
-    .gene-table-scroll { overflow-x: auto; max-height: 320px; overflow-y: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    thead tr { background: var(--green); }
-    thead th { padding: 0.5rem 0.75rem; text-align: left; color: #fff; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-    tbody tr:hover { background: var(--sky-pale); }
-    tbody td { padding: 0.4rem 0.75rem; font-family: 'Instrument Sans', sans-serif; font-size: 0.78rem; white-space: nowrap; }
-    .badge { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-    .badge-up   { background: var(--green-pale); color: var(--green-dark); }
-    .badge-down { background: #fdecea; color: #b84800; }
-
-    /* quadrant selector */
-    .quadrant-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: center; }
-    .quadrant-btn {
-      padding: 0.3rem 0.75rem; border: 1px solid var(--border); border-radius: 6px;
-      font-size: 0.78rem; font-weight: 500; cursor: pointer; background: #fff;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .quadrant-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
-    .quadrant-btn.active { background: var(--sky-dark); color: #fff; border-color: var(--sky-dark); }
-    .quadrant-btn.up.active   { background: var(--green-dark); border-color: var(--green-dark); }
-    .quadrant-btn.down.active { background: #b84800; border-color: #b84800; }
-
-    /* ── FAST DOT HIGHLIGHTING via CSS ── */
-    /* Default state */
-    #volcano-svg .vdot { transition: opacity 0.08s; }
-    /* When a quadrant is active, dim all dots via container class... */
-    #volcano-svg.has-selection .vdot { opacity: 0.12 !important; r: 3; }
-    /* ...then un-dim selected ones */
-    #volcano-svg.has-selection .vdot.sel { opacity: 0.95 !important; r: 4.5; stroke: #1c1c14; stroke-width: 0.8; }
-
-    /* draggable threshold lines */
-    .thresh-line { cursor: ew-resize; }
-    .thresh-line.fdr-line { cursor: ns-resize; }
-    .thresh-hit-area { fill: transparent; stroke: none; }
-    .quadrant-overlay { fill: transparent; cursor: pointer; transition: fill 0.15s; }
-    .quadrant-overlay:hover { fill: rgba(74,154,176,0.07); }
-    .quadrant-overlay.active-up   { fill: rgba(46,92,44,0.09); }
-    .quadrant-overlay.active-down { fill: rgba(184,72,0,0.09); }
-    .quadrant-overlay.active-all  { fill: rgba(74,154,176,0.07); }
-
     .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; gap: 1rem; color: var(--green); }
     .spinner { width: 36px; height: 36px; border: 3px solid var(--green-pale); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* greyed-out send button */
-    .send-btn.genome-mismatch { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
-    .send-btn .send-genome-note { font-size: 0.7rem; color: #999; margin-left: auto; font-style: italic; }
+    /* ── SEND GENE BUTTONS (Step 3) ── */
+    .send-gene-btn {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.55rem 0.85rem; border-radius: 8px;
+      border: 1.5px solid var(--border); background: #fff;
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+      text-align: left; width: 100%; color: var(--ink);
+    }
+    .send-gene-btn:hover:not(:disabled) { background: var(--green-pale); border-color: var(--green); }
+    .send-gene-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .send-gene-btn-label { flex: 1; }
+    .send-gene-btn-count {
+      font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem;
+      border-radius: 10px; background: var(--green-pale); color: var(--green-dark);
+      white-space: nowrap;
+    }
+    #send-down-btn .send-gene-btn-count { background: #fdecea; color: #b84800; }
+    #send-down-btn:hover:not(:disabled) { background: #fff5f3; border-color: #b84800; }
+    #send-all-btn .send-gene-btn-count { background: var(--sky-pale); color: var(--sky-dark); }
+    #send-all-btn:hover:not(:disabled) { background: var(--sky-pale); border-color: var(--sky-dark); }
 
     /* ── COLUMN MAPPER ── */
     #mapper-panel { display: none; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
@@ -428,21 +419,40 @@
     }
     .plot-btn:hover { background: var(--green-dark); }
     .plot-btn:disabled { background: #bbb; cursor: not-allowed; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--green-dark); color: rgba(255,255,255,0.5);
+      padding: 1.25rem 2.5rem; font-size: 0.8rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-right { display: flex; gap: 1.5rem; }
+
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-brand" href="/">
-    <img class="nav-brand-logo"
-         src="{{ url_for('static', filename='images/feta_banner.png') }}"
-         alt="FETA">
-  </a>
+  <div class="nav-logos">
+    <a class="nav-brand" href="https://www.maizegdb.org">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/mgdb_logo_small.png') }}"
+          alt="MGDB">
+    </a>
+    <a class="nav-brand" href="/">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/feta_words_transparent.png') }}"
+          alt="FETA">
+    </a>
+  </div>
   <div class="nav-links">
-    <a href="/">B73 Enrichment</a>
+    <a href="/">Home</a>
+    <a href="/index">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
-    <a href="/rnaseq" class="active">RNA-seq Analysis</a>
+    <a href="/rnaseq" class="active">RNA-Seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -450,9 +460,8 @@
 
 <div class="hero">
   <div class="hero-inner" style="text-align:center;max-width:100%;">
-    <div class="hero-eyebrow">Maize Genomics Tool</div>
-    <h1>RNA-seq<br><em>Analysis</em></h1>
-    <p class="hero-sub" style="max-width:560px;margin:0 auto;">Upload your own EdgeR output or browse curated MaizeGDB RNA-seq datasets to visualize DEGs and send gene lists directly to enrichment analysis.</p>
+    <h1>RNA-Seq<br><em>Analysis</em></h1>
+    <p class="hero-sub" style="max-width:560px;margin:0 auto;">Upload your own data or browse MaizeGDB's curated datasets to visualize DEGs and send gene lists directly to enrichment analysis.</p>
   </div>
 </div>
 
@@ -469,7 +478,7 @@
       </div>
       <div class="mode-selector">
         <button class="mode-btn active" id="mode-upload" onclick="setMode('upload')" style="pointer-events:auto;">
-          <span class="mode-icon" style="pointer-events:none;">📂</span><span style="pointer-events:none;">Upload RNA-seq Data</span>
+          <span class="mode-icon" style="pointer-events:none;">📂</span><span style="pointer-events:none;">Upload RNA-Seq Data</span>
         </button>
         <button class="mode-btn" id="mode-browse" onclick="setMode('browse')" style="pointer-events:auto;">
           <span class="mode-icon" style="pointer-events:none;display:block;height:2.6rem;line-height:2.6rem;">
@@ -481,7 +490,7 @@
       <!-- Upload sub-panel -->
       <div id="upload-subpanel">
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-          <div class="drop-zone-icon">📂</div>
+          <div class="drop-zone-icon"></div>
           <div id="drop-zone-text">Click or drag &amp; drop your EdgeR, DESeq2, etc. data in .txt, .tsv, or .csv format</div>
         </div>
         <input type="file" id="file-input" accept=".txt,.tsv,.csv">
@@ -534,27 +543,39 @@
         <div class="step-num">3</div>
         <span class="step-title">Extract &amp; send DEGs</span>
       </div>
-      <p style="font-size:0.78rem;color:#777;margin-bottom:0.6rem;line-height:1.4;">
-        Select a quadrant in the plot or use the buttons below to choose which genes to extract, then send them to enrichment analysis.
-      </p>
-      <div id="extract-status" class="info-msg"></div>
 
-      <div class="send-section">
-        <div class="send-label">Send selected genes to:</div>
-        <div class="send-btns">
-          <button class="send-btn" id="send-b73-btn" disabled>
-            <span class="send-dot" style="background:var(--green-dark)"></span>
-            B73 Enrichment
-            <span class="send-genome-note" id="send-b73-note"></span>
-          </button>
-          <button class="send-btn" id="send-nonb73-btn" disabled>
-            <span class="send-dot" style="background:var(--sky-dark)"></span>
-            Non-B73 Enrichment
-            <span class="send-genome-note" id="send-nonb73-note"></span>
-          </button>
-        </div>
-        <p class="warning-msg" id="send-warn">No genes selected. Click a quadrant button in the plot first.</p>
+      <!-- Background detected badge -->
+      <div id="background-badge" style="display:none;align-items:center;gap:0.45rem;margin-bottom:0.85rem;padding:0.4rem 0.65rem;background:var(--green-pale);border:1px solid var(--green-light);border-radius:7px;">
+        <span style="font-size:0.78rem;color:#555;font-weight:600;white-space:nowrap;">Background detected:</span>
+        <span id="background-badge-label" style="font-size:0.78rem;font-weight:700;color:var(--green-dark);"></span>
       </div>
+      <div id="background-badge-none" style="margin-bottom:0.85rem;padding:0.4rem 0.65rem;background:#f5f5f0;border:1px solid var(--border);border-radius:7px;">
+        <span style="font-size:0.78rem;color:#aaa;font-style:italic;">Background not yet detected — load data first.</span>
+      </div>
+
+      <!-- Gene-set buttons -->
+      <div style="font-size:0.75rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.5rem;">Genes to send for enrichment</div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem;">
+        <button class="send-gene-btn" id="send-up-btn" disabled>
+          <span style="font-size:1rem;">▲</span>
+          <span class="send-gene-btn-label">Up-regulated</span>
+          <span class="send-gene-btn-count" id="send-up-count"></span>
+        </button>
+        <button class="send-gene-btn" id="send-down-btn" disabled>
+          <span style="font-size:1rem;">▼</span>
+          <span class="send-gene-btn-label">Down-regulated</span>
+          <span class="send-gene-btn-count" id="send-down-count"></span>
+        </button>
+        <button class="send-gene-btn" id="send-all-btn" disabled>
+          <span style="font-size:1rem;">◈</span>
+          <span class="send-gene-btn-label">All DEGs</span>
+          <span class="send-gene-btn-count" id="send-all-count"></span>
+        </button>
+      </div>
+
+      <!-- Hidden genome-mismatch notes (kept for JS compatibility) -->
+      <span id="send-b73-note"   style="display:none;"></span>
+      <span id="send-nonb73-note" style="display:none;"></span>
     </div>
 
   </aside>
@@ -565,7 +586,7 @@
     <!-- ── MaizeGDB STUDY BROWSER ── -->
     <div id="browser-panel">
       <div style="margin-bottom:1.25rem;">
-        <div style="font-size:1rem;font-weight:600;color:var(--green-dark);margin-bottom:0.25rem;">MaizeGDB Curated RNA-seq Studies</div>
+        <div style="font-size:1rem;font-weight:600;color:var(--green-dark);margin-bottom:0.25rem;">MaizeGDB Curated RNA-Seq Studies</div>
         <div style="font-size:0.82rem;color:#888;">Search by keyword or filter by category, then click a study to load it.</div>
       </div>
 
@@ -621,7 +642,7 @@
       </div>
       <div class="mapper-error" id="mapper-error"></div>
       <div style="position:relative;margin-bottom:0.75rem;">
-        <span style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none;">🔍</span>
+        <span style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none;"></span>
         <input type="text" id="mapper-search"
           placeholder="Search column names…"
           style="width:100%;padding:0.45rem 0.75rem 0.45rem 2.1rem;border:1px solid var(--border);border-radius:7px;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;background:#fff;color:var(--ink);"
@@ -643,7 +664,10 @@
     </div>
 
     <div class="results-placeholder" id="placeholder">
-      <div class="big-icon">🧬</div>
+      <div class="big-icon"><span class="mode-icon" style="pointer-events:none;display:block;height:2.6rem;line-height:2.6rem;">
+        <img src="{{ url_for('static', filename='images/mgdb_kernels.png') }}" alt="" style="width:4.2rem;height:2.4rem;vertical-align:middle;pointer-events:none;">
+      </span>
+      </div>
       <p id="placeholder-text">Upload a valid data file to generate a volcano plot.</p>
     </div>
     <div id="volcano-container" style="display:none;">
@@ -695,54 +719,33 @@
             <button class="dl-btn" id="dl-degs-tsv">⬇ DEGs TSV</button>
           </div>
         </div>
-        <!-- Quadrant selector buttons -->
-        <div class="quadrant-row">
-          <span style="font-size:0.75rem;color:#888;font-weight:600;">Select quadrant:</span>
-          <button class="quadrant-btn up"   id="qbtn-up"   data-q="up">▲ Up-regulated</button>
-          <button class="quadrant-btn down" id="qbtn-down" data-q="down">▼ Down-regulated</button>
-          <button class="quadrant-btn"      id="qbtn-all"  data-q="all">All DEGs</button>
-          <button class="quadrant-btn"      id="qbtn-clear" data-q="none" style="color:#999;">✕ Clear</button>
-        </div>
         <svg id="volcano-svg"></svg>
         <div class="volcano-tooltip" id="volcano-tooltip"></div>
-      </div>
-
-      <!-- Gene table -->
-      <div class="gene-table-wrap" id="gene-table-wrap" style="display:none;">
-        <div class="gene-table-header">
-          <span class="gene-table-title" id="gene-table-title">Selected Genes</span>
-          <div class="chart-actions">
-            <button class="dl-btn" id="dl-selected-tsv">⬇ Download TSV</button>
-          </div>
-        </div>
-        <div class="gene-table-scroll">
-          <table id="gene-table">
-            <thead><tr>
-              <th>Gene Model</th><th>logFC</th><th>logCPM</th><th>F</th><th>PValue</th><th>FDR</th><th>Direction</th>
-            </tr></thead>
-            <tbody id="gene-table-body"></tbody>
-          </table>
+        <div class="volcano-hl-wrap">
+          <span class="volcano-hl-label">🔍 Highlight genes:</span>
+          <input class="volcano-hl-input" id="volcano-hl-input"
+            placeholder="Zm00001eb000010, Zm00001eb000020, …" />
+          <button class="volcano-hl-btn" onclick="applyVolcanoHighlight()">Highlight</button>
+          <button class="volcano-hl-clear" onclick="clearVolcanoHighlight()">✕ Clear</button>
+          <span class="volcano-hl-status" id="volcano-hl-status"></span>
         </div>
       </div>
-
     </div>
-  </main>
+  </div>
 </div>
-
-<div class="volcano-tooltip" id="volcano-tooltip"></div>
 
 <script>
 // ── State ──
 let _rawData    = [];
 let _threshFC   = 2;
 let _threshFDR  = 2;
-let _selected   = [];
-let _quadrant   = "none";
 let _filename   = "";
 let _detectedGenotype = null;
 let _currentMode      = "upload";   // "upload" | "browse"
 let _allStudies       = [];         // parsed from rnaseq_studies.txt
+let _volcanoHighlightSet = new Set(); // genes to highlight on the volcano plot
 let _selectedStudy    = null;       // currently highlighted study card
+let _browseText       = "";         // raw text of the fetched study, held for re-plotting
 let _yAxisLabel       = "−log₁₀(FDR)"; // updated by mapper or reset by parseEdgeR
 let _xAxisLabel       = "log₂ Fold Change"; // updated by browse column choice
 
@@ -754,27 +757,27 @@ function setMode(mode) {
   document.getElementById("upload-subpanel").style.display = mode === "upload" ? "" : "none";
   document.getElementById("browse-subpanel").style.display = mode === "browse" ? "" : "none";
 
-  const browser  = document.getElementById("browser-panel");
+  // Always reset data and UI state when switching modes
+  _rawData = [];
+  const volcano     = document.getElementById("volcano-container");
   const placeholder = document.getElementById("placeholder");
-  const volcano  = document.getElementById("volcano-container");
+  const browser     = document.getElementById("browser-panel");
+
+  volcano.style.display = "none";
+  placeholder.style.display = "flex";
+  document.getElementById("mapper-panel").classList.remove("visible");
+  document.getElementById("browse-col-choice").style.display = "none";
+  document.getElementById("apply-thresh-btn").disabled = true;
+  document.getElementById("reset-thresh-btn").disabled = true;
+  document.getElementById("reset-data-btn").disabled   = true;
 
   if (mode === "browse") {
     browser.classList.add("visible");
-    // Only show placeholder if no volcano data loaded
-    if (!_rawData.length) {
-      placeholder.style.display = "flex";
-      document.getElementById("placeholder-text").textContent = "Select a study from the list to generate a volcano plot.";
-      volcano.style.display = "none";
-    }
+    document.getElementById("placeholder-text").textContent = "Select a study from the list to generate a volcano plot.";
     if (!_allStudies.length) loadStudyList();
   } else {
     browser.classList.remove("visible");
-    document.getElementById("browse-col-choice").style.display = "none";
-    if (!_rawData.length) {
-      placeholder.style.display = "flex";
-      document.getElementById("placeholder-text").textContent = "Upload an EdgeR output file to generate a volcano plot.";
-      volcano.style.display = "none";
-    }
+    document.getElementById("placeholder-text").textContent = "Upload an EdgeR output file to generate a volcano plot.";
   }
 }
 
@@ -860,8 +863,6 @@ function selectStudy(s) {
   btn.classList.add("visible");
   btn.textContent = `▶ Load: ${_selectedStudy.display_name || formatStudyTitle(_selectedStudy.filename)}`;
 }
-
-let _browseText = ""; // raw text of the fetched study, held for re-plotting
 
 async function loadSelectedStudy() {
   if (!_selectedStudy) return;
@@ -1067,10 +1068,10 @@ function renderMapperRows(_parsedHeader, dataRow, autoGeneIdx, guessRole, isAlre
       <td>
         <select class="mapper-role-sel role-${autoRole || "none"}" data-col="${i}" onchange="onRoleChange(this)">
           <option value=""    ${!autoRole           ? "selected":""}>— Ignore</option>
-          <option value="gene"${autoRole==="gene"   ? "selected":""}>🔑 Gene ID</option>
-          <option value="fc"  ${autoRole==="fc"     ? "selected":""}>📈 Log Fold Change</option>
-          <option value="pval"${autoRole==="pval"   ? "selected":""}>🔬 p-value</option>
-          <option value="fdr" ${autoRole==="fdr"    ? "selected":""}>✅ FDR / Adj. p-value</option>
+          <option value="gene"${autoRole==="gene"   ? "selected":""}>Gene ID</option>
+          <option value="fc"  ${autoRole==="fc"     ? "selected":""}>Log Fold Change</option>
+          <option value="pval"${autoRole==="pval"   ? "selected":""}>p-value</option>
+          <option value="fdr" ${autoRole==="fdr"    ? "selected":""}>FDR / Adj. p-value</option>
         </select>
       </td>
       <td class="mapper-transform-cell" id="transform-cell-${i}">
@@ -1241,44 +1242,13 @@ function updateThreshLabel() {
 
 // ── Reset Data / Remap Columns ──
 document.getElementById("reset-data-btn").addEventListener("click", () => {
-  _rawData = []; _selected = []; _quadrant = "none";
+  _rawData = [];
   document.getElementById("volcano-container").style.display = "none";
-  document.getElementById("gene-table-wrap").style.display   = "none";
   document.getElementById("mapper-panel").classList.add("visible");
   document.getElementById("apply-thresh-btn").disabled = true;
   document.getElementById("reset-thresh-btn").disabled = true;
   document.getElementById("reset-data-btn").disabled   = true;
-  updateQuadrantButtons();
 });
-
-// parseEdgeR kept for legacy — MaizeGDB now uses plotBrowseStudy
-function parseEdgeR(text) {
-  _yAxisLabel = "−log₁₀(FDR)";
-  _xAxisLabel = "log₂ Fold Change";
-  updateThreshLabel();
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) throw new Error("File appears empty.");
-  const firstLine = lines[0].split(/\t/);
-  let dataStart = (firstLine[0].toLowerCase().includes("logfc") || firstLine[0].toLowerCase().includes("log")) ? 1 : 0;
-  const rows = [];
-  for (let i = dataStart; i < lines.length; i++) {
-    const parts = lines[i].split(/\t/);
-    if (parts.length < 6) continue;
-    const gene = parts[0].trim();
-    const logFC = parseFloat(parts[1]), logCPM = parseFloat(parts[2]);
-    const F = parseFloat(parts[3]), pval = parseFloat(parts[4]), fdr = parseFloat(parts[5]);
-    if (!gene || isNaN(logFC) || isNaN(fdr)) continue;
-    rows.push({ gene, logFC, logCPM, F, pval, fdr });
-  }
-  if (rows.length === 0) throw new Error("No valid data rows found.");
-  _rawData = rows;
-  document.getElementById("apply-thresh-btn").disabled = false;
-  document.getElementById("reset-thresh-btn").disabled = false;
-  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
-  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
-  detectGenomeFromGenes(rows.map(r => r.gene));
-  drawVolcano();
-}
 
 function showFileWarn(msg) {
   const w = document.getElementById("file-warn"); w.textContent = msg; w.classList.add("show");
@@ -1301,25 +1271,17 @@ async function detectGenomeFromGenes(geneList) {
 }
 
 function updateSendButtonGenomeState() {
-  const b73Btn    = document.getElementById("send-b73-btn");
-  const nb73Btn   = document.getElementById("send-nonb73-btn");
-  const b73Note   = document.getElementById("send-b73-note");
-  const nb73Note  = document.getElementById("send-nonb73-note");
+  const badge     = document.getElementById("background-badge");
+  const badgeNone = document.getElementById("background-badge-none");
+  const badgeLabel = document.getElementById("background-badge-label");
 
-  // Reset mismatch class first
-  b73Btn.classList.remove("genome-mismatch");
-  nb73Btn.classList.remove("genome-mismatch");
-  b73Note.textContent  = "";
-  nb73Note.textContent = "";
-
-  if (!_detectedGenotype) return;
-
-  if (_detectedGenotype === "B73") {
-    nb73Btn.classList.add("genome-mismatch");
-    nb73Note.textContent = "B73 genes";
+  if (_detectedGenotype) {
+    badge.style.display     = "flex";
+    badgeNone.style.display = "none";
+    badgeLabel.textContent  = _detectedGenotype;
   } else {
-    b73Btn.classList.add("genome-mismatch");
-    b73Note.textContent = `${_detectedGenotype} genes`;
+    badge.style.display     = "none";
+    badgeNone.style.display = "block";
   }
 }
 
@@ -1327,8 +1289,7 @@ function updateSendButtonGenomeState() {
 document.getElementById("apply-thresh-btn").addEventListener("click", () => {
   _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
   _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
-  _quadrant = "none"; _selected = [];
-  updateQuadrantButtons(); drawVolcano(); updateGeneTable(); updateSendButtons();
+  drawVolcano();
 });
 
 // ── Threshold Reset (button) ──
@@ -1336,60 +1297,57 @@ document.getElementById("reset-thresh-btn").addEventListener("click", () => {
   document.getElementById("thresh-fc").value  = 2;
   document.getElementById("thresh-fdr").value = 2;
   _threshFC = 2; _threshFDR = 2;
-  _quadrant = "none"; _selected = [];
-  updateQuadrantButtons(); drawVolcano(); updateGeneTable(); updateSendButtons();
+  drawVolcano();
 });
-
-// ── Quadrant Buttons ──
-document.querySelectorAll(".quadrant-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const q = btn.dataset.q;
-    _quadrant = (_quadrant === q && q !== "none") ? "none" : q;
-    updateQuadrantButtons(); selectQuadrant(_quadrant);
-  });
-});
-
-function updateQuadrantButtons() {
-  document.querySelectorAll(".quadrant-btn").forEach(b => b.classList.toggle("active", b.dataset.q === _quadrant));
-}
-
-function selectQuadrant(q) {
-  if (q === "none")       _selected = [];
-  else if (q === "up")    _selected = _rawData.filter(r => r.logFC >=  _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
-  else if (q === "down")  _selected = _rawData.filter(r => r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
-  else if (q === "all")   _selected = _rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
-  updateGeneTable(); updateSendButtons(); highlightDots(); updateOverlayHighlight();
-}
 
 function updateSendButtons() {
-  const hasSel = _selected.length > 0;
-  const b73  = document.getElementById("send-b73-btn");
-  const nb73 = document.getElementById("send-nonb73-btn");
-  const warn = document.getElementById("send-warn");
-  // Only enable if has selection AND not genome-mismatched
-  b73.disabled  = !hasSel || b73.classList.contains("genome-mismatch");
-  nb73.disabled = !hasSel || nb73.classList.contains("genome-mismatch");
-  warn.classList.toggle("show", !hasSel && _quadrant !== "none");
-  const statusEl = document.getElementById("extract-status");
-  if (hasSel) { statusEl.textContent = `${_selected.length.toLocaleString()} genes selected`; statusEl.classList.add("show"); }
-  else        { statusEl.classList.remove("show"); }
+  if (!_rawData.length) return;
+
+  const upGenes   = _rawData.filter(r => r.logFC >=  _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+  const downGenes = _rawData.filter(r => r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+  const allGenes  = _rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR);
+
+  const upBtn   = document.getElementById("send-up-btn");
+  const downBtn = document.getElementById("send-down-btn");
+  const allBtn  = document.getElementById("send-all-btn");
+
+  upBtn.disabled   = upGenes.length   === 0;
+  downBtn.disabled = downGenes.length === 0;
+  allBtn.disabled  = allGenes.length  === 0;
+
+  document.getElementById("send-up-count").textContent   = upGenes.length.toLocaleString()   + " genes";
+  document.getElementById("send-down-count").textContent = downGenes.length.toLocaleString() + " genes";
+  document.getElementById("send-all-count").textContent  = allGenes.length.toLocaleString()  + " genes";
+
+  // Store lists for click handlers
+  upBtn._genes   = upGenes;
+  downBtn._genes = downGenes;
+  allBtn._genes  = allGenes;
 }
 
 // ── Send to Enrichment ──
-document.getElementById("send-b73-btn").addEventListener("click",    () => sendToEnrichment("/"));
-document.getElementById("send-nonb73-btn").addEventListener("click", () => sendToEnrichment("/nonb73"));
-
-function sendToEnrichment(targetUrl) {
-  if (!_selected.length) return;
-  sessionStorage.setItem("feta_prefill_genes", _selected.map(r => r.gene).join("\n"));
-  window.location.href = targetUrl + "?prefill=1";
-}
+["send-up-btn","send-down-btn","send-all-btn"].forEach(id => {
+  document.getElementById(id).addEventListener("click", function() {
+    const genes = this._genes;
+    if (!genes || !genes.length) return;
+    const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/" : "/nonb73";
+    sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
+    window.location.href = targetUrl + "?prefill=1";
+  });
+});
 
 // ── Draw Volcano ──
 function drawVolcano() {
   document.getElementById("placeholder").style.display       = "none";
   document.getElementById("volcano-container").style.display = "block";
   updateStatsBar();
+
+  // Clear any stale gene highlights when loading new data
+  _volcanoHighlightSet = new Set();
+  const hlInput  = document.getElementById("volcano-hl-input");
+  const hlStatus = document.getElementById("volcano-hl-status");
+  if (hlInput)  { hlInput.value = ""; hlInput.style.borderColor = ""; }
+  if (hlStatus) { hlStatus.textContent = ""; }
 
   const svgEl  = document.getElementById("volcano-svg");
   const W      = svgEl.parentElement.clientWidth - 40 || 700;
@@ -1424,30 +1382,17 @@ function drawVolcano() {
     .selectAll("line").attr("stroke","#ede9de").attr("stroke-dasharray","3,3");
   g.select(".grid .domain").remove();
 
-  // ── Clickable quadrant overlays (behind dots) ──
-  const fcX  = xScale(_threshFC);
-  const fcXn = xScale(-_threshFC);
-  const fdrY = yScale(_threshFDR);
-
-  // Up quadrant (right of +FC, above FDR)
-  g.append("rect").attr("class","quadrant-overlay").attr("id","qov-up")
-    .attr("x", fcX).attr("y", 0).attr("width", plotW - fcX).attr("height", fdrY)
-    .on("click", () => clickQuadrant("up"));
-  // Down quadrant (left of -FC, above FDR)
-  g.append("rect").attr("class","quadrant-overlay").attr("id","qov-down")
-    .attr("x", 0).attr("y", 0).attr("width", fcXn).attr("height", fdrY)
-    .on("click", () => clickQuadrant("down"));
-  // NS region (between FC lines, any height — not interactive)
-  // We skip that so clicks there do nothing
-
   // ── Dots ──
   const tooltip = document.getElementById("volcano-tooltip");
   g.selectAll(".vdot").data(_rawData).join("circle")
     .attr("class","vdot")
     .attr("cx", r => xScale(r.logFC))
     .attr("cy", r => yScale(-Math.log10(Math.max(r.fdr,1e-300))))
-    .attr("r", 3).attr("opacity", 0.72).attr("fill", r => dotColor(r)).attr("stroke","none")
-    .style("cursor","pointer")
+    .attr("r", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 6 : 3)
+    .attr("opacity", r => (_volcanoHighlightSet.size > 0 && !_volcanoHighlightSet.has(r.gene.toLowerCase())) ? 0.3 : 0.85)
+    .attr("fill", r => dotColor(r))
+    .attr("stroke", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? "#c49428" : "none")
+    .attr("stroke-width", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 2 : 0)
     .on("mousemove", function(event, r) {
       tooltip.style.display = "block";
       tooltip.style.left = (event.clientX + 14) + "px";
@@ -1473,11 +1418,9 @@ function drawVolcano() {
   g.append("text").attr("transform","rotate(-90)").attr("x",-(plotH/2)).attr("y",-46)
     .attr("text-anchor","middle").attr("font-size",13).attr("fill","#555").text(_yAxisLabel);
 
-  highlightDots();
-  updateOverlayHighlight();
-
   document.getElementById("volcano-title").textContent =
     `Volcano Plot — ${_filename || "EdgeR results"} (n = ${_rawData.length.toLocaleString()})`;
+  updateSendButtons();
 }
 
 // ── Draggable threshold lines ──
@@ -1486,16 +1429,14 @@ function drawThresholdLines(g, xScale, yScale, plotW, plotH, svgEl) {
 
   function redrawAfterDrag() {
     updateStatsBar();
-    // Recolor dots
-    svgEl._g.selectAll(".vdot").attr("fill", r => dotColor(r));
-    // Update overlays position
-    const fcX  = xScale(_threshFC);
-    const fcXn = xScale(-_threshFC);
-    const fdrY = yScale(_threshFDR);
-    svgEl._g.select("#qov-up")  .attr("x", fcX).attr("width", Math.max(0, plotW - fcX)).attr("height", fdrY);
-    svgEl._g.select("#qov-down").attr("width", Math.max(0, fcXn)).attr("height", fdrY);
-    // Re-select quadrant with new thresholds
-    if (_quadrant !== "none") { selectQuadrant(_quadrant); }
+    // Recolor dots, preserving highlight state
+    svgEl._g.selectAll(".vdot")
+      .attr("fill", r => dotColor(r))
+      .attr("r", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 6 : 3)
+      .attr("opacity", r => (_volcanoHighlightSet.size > 0 && !_volcanoHighlightSet.has(r.gene.toLowerCase())) ? 0.3 : 0.85)
+      .attr("stroke", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? "#c49428" : "none")
+      .attr("stroke-width", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 2 : 0);
+    updateSendButtons();
   }
 
   // +FC vertical line
@@ -1565,20 +1506,10 @@ function drawThresholdLines(g, xScale, yScale, plotW, plotH, svgEl) {
   addHitRect("thresh-fdr-hit", 0, fdrY - HIT, plotW, HIT*2, "ns-resize").call(fdrDrag);
 }
 
-function clickQuadrant(q) {
-  _quadrant = (_quadrant === q) ? "none" : q;
-  updateQuadrantButtons();
-  selectQuadrant(_quadrant);
-}
-
-function updateOverlayHighlight() {
-  const g = document.getElementById("volcano-svg")._g;
-  if (!g) return;
-  g.select("#qov-up")  .classed("active-up",   _quadrant === "up");
-  g.select("#qov-down").classed("active-down",  _quadrant === "down");
-}
-
 function dotColor(r) {
+  if (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) {
+    return "#e8b84b"; // gold highlight
+  }
   const sig = -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR;
   const up   = r.logFC >=  _threshFC;
   const down = r.logFC <= -_threshFC;
@@ -1587,14 +1518,56 @@ function dotColor(r) {
   return "rgba(180,175,160,0.55)";
 }
 
-function highlightDots() {
+// ── Volcano gene highlight ──
+function applyVolcanoHighlight() {
+  const input  = document.getElementById("volcano-hl-input");
+  const status = document.getElementById("volcano-hl-status");
+  const ids = input.value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  _volcanoHighlightSet = new Set(ids.map(s => s.toLowerCase()));
+
   const svgEl = document.getElementById("volcano-svg");
   if (!svgEl._g) return;
-  const selGenes = new Set(_selected.map(r => r.gene));
-  // Toggle container class — one write, CSS handles the rest
-  svgEl.classList.toggle("has-selection", selGenes.size > 0);
-  // Only touch individual dots to set/clear the .sel class
-  svgEl._g.selectAll(".vdot").classed("sel", r => selGenes.has(r.gene));
+
+  svgEl._g.selectAll(".vdot")
+    .attr("fill",         r => dotColor(r))
+    .attr("r",            r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 6 : 3)
+    .attr("opacity",      r => (_volcanoHighlightSet.size > 0 && !_volcanoHighlightSet.has(r.gene.toLowerCase())) ? 0.3 : 0.85)
+    .attr("stroke",       r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? "#c49428" : "none")
+    .attr("stroke-width", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 2 : 0);
+
+  if (!_volcanoHighlightSet.size) {
+    input.style.borderColor = "";
+    status.textContent = "";
+    return;
+  }
+  const allGenes = _rawData.map(r => r.gene.toLowerCase());
+  const matched  = ids.filter(id => allGenes.includes(id.toLowerCase()));
+  const notFound = ids.filter(id => !allGenes.includes(id.toLowerCase()));
+  if (matched.length === 0) {
+    input.style.borderColor = "#d47800";
+    status.textContent = "No matches found in this dataset";
+  } else {
+    input.style.borderColor = "#2e5c2c";
+    status.textContent = notFound.length
+      ? `${matched.length} highlighted · not found: ${notFound.join(", ")}`
+      : `${matched.length} gene${matched.length !== 1 ? "s" : ""} highlighted`;
+  }
+}
+
+function clearVolcanoHighlight() {
+  _volcanoHighlightSet = new Set();
+  const input  = document.getElementById("volcano-hl-input");
+  const status = document.getElementById("volcano-hl-status");
+  if (input)  { input.value = ""; input.style.borderColor = ""; }
+  if (status) { status.textContent = ""; }
+  const svgEl = document.getElementById("volcano-svg");
+  if (!svgEl._g) return;
+  svgEl._g.selectAll(".vdot")
+    .attr("fill", r => dotColor(r))
+    .attr("r", 3)
+    .attr("opacity", 0.85)
+    .attr("stroke", "none")
+    .attr("stroke-width", 0);
 }
 
 // ── Stats Bar ──
@@ -1612,27 +1585,14 @@ function updateStatsBar() {
     <div class="stat-chip"><span class="stat-chip-label">${_yAxisLabel} threshold</span><span class="stat-chip-val">${_threshFDR}</span></div>`;
 }
 
-// ── Gene Table ──
-function updateGeneTable() {
-  const wrap  = document.getElementById("gene-table-wrap");
-  const body  = document.getElementById("gene-table-body");
-  const title = document.getElementById("gene-table-title");
-  if (!_selected.length) { wrap.style.display = "none"; return; }
-  const label = _quadrant === "up" ? "Up-regulated" : _quadrant === "down" ? "Down-regulated" : "All DEGs";
-  title.textContent = `${label} — ${_selected.length.toLocaleString()} genes`;
-  wrap.style.display = "block";
-  body.innerHTML = _selected.map(r => {
-    const badge = r.logFC > 0 ? `<span class="badge badge-up">▲ up</span>` : `<span class="badge badge-down">▼ down</span>`;
-    return `<tr><td>${r.gene}</td><td>${r.logFC.toFixed(4)}</td><td>${r.logCPM.toFixed(4)}</td><td>${r.F.toFixed(2)}</td><td>${r.pval.toExponential(3)}</td><td>${r.fdr.toExponential(3)}</td><td>${badge}</td></tr>`;
-  }).join("");
-}
-
 // ── Downloads ──
 document.getElementById("dl-volcano-svg").addEventListener("click", () => {
   const svgEl = document.getElementById("volcano-svg");
-  const blob  = new Blob([svgEl.outerHTML], { type: "image/svg+xml;charset=utf-8" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = `${_filename || "volcano"}_plot.svg`; a.click();
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const a = document.createElement("a");
+  a.href = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+  a.download = `${_filename || "volcano"}_plot.svg`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 });
 
 document.getElementById("dl-volcano-png").addEventListener("click", () => {
@@ -1643,16 +1603,19 @@ document.getElementById("dl-volcano-png").addEventListener("click", () => {
   const ctx = canvas.getContext("2d"); ctx.scale(2,2);
   ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
   const img = new Image();
-  img.onload = () => { ctx.drawImage(img,0,0); const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download=`${_filename||"volcano"}_plot.png`; a.click(); };
-  img.src = URL.createObjectURL(new Blob([svgEl.outerHTML],{type:"image/svg+xml;charset=utf-8"}));
+  img.onload = () => {
+    ctx.drawImage(img,0,0);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `${_filename||"volcano"}_plot.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
 });
 
 document.getElementById("dl-degs-tsv").addEventListener("click", () => {
   downloadTSV(_rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr,1e-300)) >= _threshFDR), `${_filename||"degs"}_all.tsv`);
-});
-
-document.getElementById("dl-selected-tsv").addEventListener("click", () => {
-  downloadTSV(_selected, `${_filename||"degs"}_selected.tsv`);
 });
 
 function downloadTSV(rows, filename) {
@@ -1660,9 +1623,50 @@ function downloadTSV(rows, filename) {
     ...rows.map(r => [r.gene,r.logFC,r.logCPM,r.F,r.pval,r.fdr,r.logFC>0?"up":"down"].join("\t"))];
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"}));
-  a.download = filename; a.click();
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+
+// ── Responsive redraw ──
+let _resizeTimer = null;
+const _resizeObserver = new ResizeObserver(() => {
+  if (!_rawData.length) return;
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => drawVolcano(), 150);
+});
+_resizeObserver.observe(document.querySelector(".volcano-wrap"));
+
+// ── Volcano highlight — Enter key support ──
+document.getElementById("volcano-hl-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") applyVolcanoHighlight();
+});
 </script>
+
+<!-- feedback form -->
+<script type="text/javascript">
+  window.ATL_JQ_PAGE_PROPS = {
+    '883299e6': {  // feedback
+      "triggerFunction": function(showCollectorDialog) {
+        //Requires that jQuery is available!
+        jQuery(".feedback-form").click(function(e) {
+          e.preventDefault();
+          showCollectorDialog();
+        });
+      },
+      fieldValues: {
+        recordWebInfo: '1', // field Name
+        recordWebInfoConsent: ['1'] // field Id
+      }
+    }
+  };
+</script>
+
+<footer style="margin-top:2rem;">
+  <span>FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Hosted by <a href="https://maizegdb.org" target="_blank">MaizeGDB</a></span>
+  <div class="footer-right">
+    <a href="#!" class="feedback-form">Contact us</a>
+  </div>
+</footer>
 
 </body>
 </html>

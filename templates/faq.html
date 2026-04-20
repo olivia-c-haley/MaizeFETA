@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FAQ — FETA</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script type ='text/javascript' src='https://maizegdb.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-3o5b4z/b/5/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=883299e6'></script>
   <style>
     :root {
       --ink: #1c1c14;
@@ -12,16 +13,11 @@
       --cream: #f0ead8;
       --gold: #e8b84b;
       --gold-dark: #c49428;
-      --peach: #e8a882;
-      --peach-pale: #f5ddd0;
-      --sky: #89c4d4;
       --sky-pale: #d8eff5;
       --sky-dark: #4a9ab0;
       --green: #407F3D;
       --green-dark: #2e5c2c;
-      --green-light: #5a9e57;
       --green-pale: #d6ecd5;
-      --red-soft: #c44a3a;
       --border: #d4cebc;
       --shadow: rgba(45, 92, 44, 0.14);
     }
@@ -41,20 +37,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 2.5rem;
+      padding: 0.5rem 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
+    .nav-logos {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
     .nav-brand { display: flex; align-items: center; gap: 0.6rem; }
     .nav-brand-logo { height: 32px; width: auto; }
-    .nav-brand-text {
-      font-family: 'Instrument Sans', sans-serif;
-      font-size: 0.78rem; font-weight: 600;
-      color: rgba(255,255,255,0.9);
-      line-height: 1.3;
-    }
     .nav-links { display: flex; gap: 0.25rem; }
     .nav-links a {
       color: rgba(255,255,255,0.72);
@@ -83,14 +78,6 @@
       pointer-events: none;
     }
     .hero-inner { position: relative; z-index: 1; }
-    .hero-eyebrow {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 1rem;
-    }
     .hero h1 {
       font-family: 'Instrument Sans', sans-serif;
       font-size: clamp(2rem, 5vw, 3.2rem);
@@ -194,43 +181,39 @@
     .faq-a a { color: var(--sky-dark); text-decoration: none; }
     .faq-a a:hover { text-decoration: underline; }
 
-    /* ── CALLOUT BOX ── */
-    .faq-callout {
-      background: var(--sky-pale);
-      border-left: 4px solid var(--sky-dark);
-      border-radius: 0 8px 8px 0;
-      padding: 0.75rem 1rem;
-      margin: 0.7rem 0;
-      font-size: 0.86rem;
-      line-height: 1.6;
-      color: #2a4a55;
-    }
-
     /* ── FOOTER ── */
     footer {
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.78rem;
-      color: #888;
-      border-top: 1px solid var(--border);
-      background: var(--cream);
+      background: var(--green-dark); color: rgba(255,255,255,0.5);
+      padding: 1.25rem 2.5rem; font-size: 0.8rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
     }
+    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-right { display: flex; gap: 1.5rem; }
   </style>
+
 </head>
 <body>
 
 <nav>
-  <div class="nav-brand">
-    <img class="nav-brand-logo"
-         src="{{ url_for('static', filename='images/feta_banner.png') }}"
-         alt="FETA">
-    
+  <div class="nav-logos">
+    <a class="nav-brand" href="https://www.maizegdb.org">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/mgdb_logo_small.png') }}"
+          alt="MGDB">
+    </a>
+    <a class="nav-brand" href="/">
+      <img class="nav-brand-logo"
+          src="{{ url_for('static', filename='images/feta_words_transparent.png') }}"
+          alt="FETA">
+    </a>
   </div>
   <div class="nav-links">
-    <a href="/">B73 Enrichment</a>
+    <a href="/">Home</a>
+    <a href="/index">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
-    <a href="/rnaseq">RNA-seq Analysis</a>
+    <a href="/rnaseq">RNA-Seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq" class="active">FAQ</a>
   </div>
@@ -238,7 +221,6 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">Documentation</div>
     <h1>Frequently Asked<br><em>Questions</em></h1>
     <p class="hero-sub">Answers to common questions about FETA's methods, inputs, statistics, and outputs.</p>
   </div>
@@ -295,7 +277,7 @@
         <li>B73: <code>Zm00001eb428070</code></li>
         <li>B97: <code>Zm00018ab012345</code></li>
       </ul>
-      <p>Trailing whitespace, carriage returns, and blank lines are automatically stripped. Gene model suffixes (e.g. <code>.1</code>, <code>.2</code>) are not required and are not expected.</p>
+      <p>Trailing whitespace, carriage returns, and blank lines are automatically stripped. Gene model suffixes (e.g. <code>_T001</code>, <code>_P001</code>) are not required and are not expected.</p>
     </div>
   </div>
 
@@ -306,10 +288,6 @@
     </button>
     <div class="faq-a">
       <p>The <strong>background</strong> (also called the universe or reference set) defines the pool of genes against which enrichment is tested. By default, FETA uses all annotated gene models for the detected genotype.</p>
-      <p>You can supply a custom background by pasting a second gene list into the background field. This is recommended when your query genes were derived from a pre-filtered experiment (e.g., only expressed genes, only genes with a protein structure prediction) — using the full genome as a background in such cases can inflate significance.</p>
-      <div class="faq-callout">
-        💡 <strong>Best practice:</strong> The background should represent the set of genes that <em>could</em> have been detected in your experiment, not all genes in the genome.
-      </div>
     </div>
   </div>
 
@@ -350,10 +328,10 @@
     <div class="faq-a">
       <p>FETA uses a one-tailed <strong>Fisher's Exact Test</strong> for each annotation term, comparing the proportion of query genes annotated to a term against the proportion in the background. The 2×2 contingency table is:</p>
       <ul>
-        <li>In term &amp; in query</li>
-        <li>In term &amp; not in query</li>
-        <li>Not in term &amp; in query</li>
-        <li>Not in term &amp; not in query</li>
+        <li>Has term &amp; in query</li>
+        <li>Has term &amp; not in query</li>
+        <li>Does not have term &amp; in query</li>
+        <li>Does not have term &amp; not in query</li>
       </ul>
       <p>Each term is tested independently, then p-values are corrected for multiple comparisons.</p>
     </div>
@@ -367,8 +345,8 @@
     <div class="faq-a">
       <p>FETA offers two correction methods, selectable in the settings panel:</p>
       <ul>
-        <li><strong>Benjamini-Hochberg (BH / FDR):</strong> Controls the false discovery rate. Recommended for exploratory analyses where some false positives are tolerable. This is the default.</li>
-        <li><strong>Bonferroni:</strong> Controls the family-wise error rate. More conservative; appropriate when you need to minimise false positives, but will reduce power considerably for large annotation sets.</li>
+        <li><strong>Bonferroni:</strong> Controls the family-wise error rate. More conservative; appropriate when you need to minimise false positives, but will reduce power considerably for large annotation sets. This is the default.</li>
+        <li><strong>Benjamini-Hochberg (BH / FDR):</strong> Controls the false discovery rate. Recommended for exploratory analyses where some false positives are tolerable.</li>
       </ul>
     </div>
   </div>
@@ -447,15 +425,15 @@
   </div>
 
   <!-- ──────────────────────────── RNA-SEQ ────────────────────────────────── -->
-  <h2 class="faq-section-title">RNA-seq Analysis</h2>
+  <h2 class="faq-section-title">RNA-Seq Analysis</h2>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggle(this)">
       <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-      What does the RNA-seq Analysis page do?
+      What does the RNA-Seq Analysis page do?
     </button>
     <div class="faq-a">
-      <p>The RNA-seq Analysis page lets you visualise differential expression results as an interactive <strong>volcano plot</strong> and extract gene lists directly from it for downstream enrichment analysis in FETA. You can either upload your own differential expression output file or load a curated dataset from MaizeGDB.</p>
+      <p>The RNA-Seq Analysis page lets you visualise differential expression results as an interactive <strong>volcano plot</strong> and extract gene lists directly from it for downstream enrichment analysis in FETA. You can either upload your own differential expression output file or load a curated dataset from MaizeGDB.</p>
       <p>Once a dataset is loaded, you can adjust logFC and significance thresholds by typing values or dragging the threshold lines on the plot, select up-regulated, down-regulated, or all DEGs with one click, and send the resulting gene list straight to the B73 or Non-B73 Enrichment pages without any copy-pasting.</p>
     </div>
   </div>
@@ -483,11 +461,8 @@
       What are the MaizeGDB curated datasets?
     </button>
     <div class="faq-a">
-      <p>The <strong>MaizeGDB curated datasets</strong> are a collection of published maize RNA-seq differential expression results that have been uniformly processed and mapped to B73 v5 gene models, curated by Hayford et al. (2024). They span a wide range of tissues, developmental stages, and stress conditions.</p>
+      <p>The <strong>MaizeGDB curated datasets</strong> are a collection of published maize RNA-Seq differential expression results that have been uniformly processed and mapped to B73 v5 gene models, curated by Hayford et al. (2024). They span a wide range of tissues, developmental stages, and stress conditions.</p>
       <p>To use them, switch to the <strong>MaizeGDB Curated Datasets</strong> mode, then search or filter studies by genotype, tissue, condition, or curation set. Click a study card to select it and press <strong>Load Selected Study</strong> to generate the volcano plot immediately — no file upload required.</p>
-      <div class="faq-callout">
-        💡 Because all curated datasets are mapped to B73 v5, the <strong>Send to B73 Enrichment</strong> button will always be available after loading one. The Non-B73 button will be greyed out.
-      </div>
     </div>
   </div>
 
@@ -512,18 +487,15 @@
       How do I send my DEGs to enrichment analysis?
     </button>
     <div class="faq-a">
-      <p>Use the quadrant selector buttons below the volcano plot — <strong>▲ Up-regulated</strong>, <strong>▼ Down-regulated</strong>, or <strong>All DEGs</strong> — to choose which genes to extract. The selected genes are highlighted on the plot and listed in the gene table below it.</p>
-      <p>Once genes are selected, the <strong>Send to B73 Enrichment</strong> or <strong>Send to Non-B73 Enrichment</strong> buttons in the sidebar become active. Clicking one will open the appropriate enrichment page in a new tab with your gene list pre-filled, ready to run.</p>
-      <div class="faq-callout">
-        💡 The send buttons are automatically disabled if the detected genome does not match the enrichment page — for example, if your file contains Non-B73 gene IDs, the B73 Enrichment button will be greyed out.
-      </div>
+      <p>Use the selector buttons in the left panel — <strong>▲ Up-regulated</strong>, <strong>▼ Down-regulated</strong>, or <strong>All DEGs</strong> — to choose which genes to extract.</p>
+      <p>FETA will automatically detect the background/genome and automatically send the gene lists to the B73 or non-B73 enrichment page. </p>
     </div>
   </div>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggle(this)">
       <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-      What can I download from the RNA-seq Analysis page?
+      What can I download from the RNA-Seq Analysis page?
     </button>
     <div class="faq-a">
       <p>Several download options are available from the volcano plot panel:</p>
@@ -536,19 +508,6 @@
     </div>
   </div>
 
-  <div class="faq-item">
-    <button class="faq-q" onclick="toggle(this)">
-      <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-      What should I use as the enrichment background when sending DEGs from RNA-seq?
-    </button>
-    <div class="faq-a">
-      <p>When you send DEGs to the enrichment pages, FETA pre-fills only the <em>query</em> gene list. On the enrichment page, the default background is the full annotated genome for the detected genotype.</p>
-      <p>However, for RNA-seq data it is generally more appropriate to use all <em>expressed</em> genes (i.e. all genes tested for differential expression) as the background, not the full genome. You can do this by pasting that broader gene list into the background field on the enrichment page before running. This avoids inflated significance caused by testing against genes that were never expressed in your experiment.</p>
-      <div class="faq-callout">
-        💡 <strong>Best practice:</strong> Use the full list of genes with detectable expression in your RNA-seq experiment as the custom background, rather than the default whole-genome background.
-      </div>
-    </div>
-  </div>
 
   <!-- ──────────────────────────── RESULTS ────────────────────────────────── -->
   <h2 class="faq-section-title">Interpreting Results</h2>
@@ -652,14 +611,36 @@
       I found a bug or have a feature request — how do I report it?
     </button>
     <div class="faq-a">
-      <p>Please contact the development team via email or open an issue on the project repository. When reporting a bug, it helps to include your browser version, the gene list you used, and a screenshot of the unexpected behaviour.</p>
+      <p>Please contact the development team <a href="#!" class="feedback-form">Contact us</a>  to open an issue. When reporting a bug, it helps to include your browser version, the gene list you used, and a screenshot of the unexpected behaviour.</p>
     </div>
   </div>
 
 </div><!-- end .faq-body -->
 
-<footer>
-  FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Maize Genetics &amp; Genomics
+<!-- feedback form -->
+<script type="text/javascript">
+  window.ATL_JQ_PAGE_PROPS = {
+    '883299e6': {  // feedback
+      "triggerFunction": function(showCollectorDialog) {
+        //Requires that jQuery is available! 
+        jQuery(".feedback-form").click(function(e) {
+          e.preventDefault();
+          showCollectorDialog();
+        });
+      },
+      fieldValues: {
+        recordWebInfo: '1', // field Name
+        recordWebInfoConsent: ['1'] // field Id
+      }
+    }
+  };
+</script>
+
+<footer style="margin-top:2rem;">
+  <span>FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Hosted by <a href="https://maizegdb.org" target="_blank">MaizeGDB</a></span>
+  <div class="footer-right">
+    <a href="#!" class="feedback-form">Contact us</a>
+  </div>
 </footer>
 
 <script>
