@@ -1319,21 +1319,35 @@ function updateSendButtons() {
   document.getElementById("send-down-count").textContent = downGenes.length.toLocaleString() + " genes";
   document.getElementById("send-all-count").textContent  = allGenes.length.toLocaleString()  + " genes";
 
-  // Store lists for click handlers
-  upBtn._genes   = upGenes;
-  downBtn._genes = downGenes;
-  allBtn._genes  = allGenes;
+
 }
 
 // ── Send to Enrichment ──
-["send-up-btn","send-down-btn","send-all-btn"].forEach(id => {
-  document.getElementById(id).addEventListener("click", function() {
-    const genes = this._genes;
-    if (!genes || !genes.length) return;
-    const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/" : "/nonb73";
-    sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
-    window.location.href = targetUrl + "?prefill=1";
-  });
+document.getElementById("send-up-btn").addEventListener("click", function() {
+  if (this.disabled) return;
+  const genes = _rawData.filter(r => r.logFC >= _threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
+  if (!genes.length) return;
+  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
+  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
+  window.location.href = targetUrl + "?prefill=1";
+});
+
+document.getElementById("send-down-btn").addEventListener("click", function() {
+  if (this.disabled) return;
+  const genes = _rawData.filter(r => r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
+  if (!genes.length) return;
+  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
+  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
+  window.location.href = targetUrl + "?prefill=1";
+});
+
+document.getElementById("send-all-btn").addEventListener("click", function() {
+  if (this.disabled) return;
+  const genes = _rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
+  if (!genes.length) return;
+  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
+  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
+  window.location.href = targetUrl + "?prefill=1";
 });
 
 // ── Draw Volcano ──
