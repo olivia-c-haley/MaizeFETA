@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FETA — RNA-Seq Analysis</title>
+  <title>FETA — RNA-seq Analysis</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <script type='text/javascript' src='https://maizegdb.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-3o5b4z/b/5/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=883299e6'></script>
   <style>
     :root {
       --ink: #1c1c14;
@@ -14,7 +13,9 @@
       --cream: #f0ead8;
       --gold: #e8b84b;
       --gold-dark: #c49428;
+      --peach: #e8a882;
       --peach-pale: #f5ddd0;
+      --sky: #89c4d4;
       --sky-pale: #d8eff5;
       --sky-dark: #4a9ab0;
       --green: #407F3D;
@@ -55,6 +56,14 @@
       align-items: center;
       gap: 1rem;
     }
+    .nav-brand-text {
+      font-family: 'Instrument Sans', sans-serif;
+      color: var(--cream);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+      line-height: 1.3;
+    }
     .nav-links { display: flex; gap: 0.25rem; }
     .nav-links a {
       color: rgba(255,255,255,0.72);
@@ -83,6 +92,14 @@
       pointer-events: none;
     }
     .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
     .hero h1 {
       font-family: 'Instrument Sans', sans-serif;
       font-size: clamp(2rem, 5vw, 3.2rem);
@@ -252,6 +269,20 @@
     .info-msg { font-size: 0.78rem; color: #777; margin-top: 0.35rem; padding: 0.35rem 0.5rem; background: var(--sky-pale); border-radius: 5px; border: 1px solid var(--sky); display: none; }
     .info-msg.show { display: block; }
 
+    /* send-to section */
+    .send-section { margin-top: 0.75rem; }
+    .send-label { font-size: 0.75rem; color: #666; margin-bottom: 0.4rem; font-weight: 600; }
+    .send-btns { display: flex; gap: 0.4rem; flex-direction: column; }
+    .send-btn {
+      padding: 0.5rem 0.75rem; border-radius: 7px; border: 1px solid var(--border);
+      font-family: 'Instrument Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; background: #fff; text-align: left;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .send-btn:hover:not(:disabled) { background: var(--green-pale); border-color: var(--green); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .send-btn .send-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
     /* ── RESULTS PANEL ── */
     .results-panel { padding: 1.5rem; overflow-y: auto; }
     .results-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; gap: 0.75rem; color: #aaa; text-align: center; }
@@ -278,13 +309,9 @@
     .dl-btn:hover { background: var(--sky-pale); border-color: var(--sky-dark); }
     .chart-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
-    #volcano-svg {
-      display: block;
-      width: 100%;
-      overflow: visible;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    #volcano-svg { display: block; width: 100%; overflow: visible; }
+
+    /* dot tooltip */
     .volcano-tooltip {
       position: fixed; pointer-events: none;
       background: rgba(28,28,20,0.92); color: #fff;
@@ -419,17 +446,6 @@
     }
     .plot-btn:hover { background: var(--green-dark); }
     .plot-btn:disabled { background: #bbb; cursor: not-allowed; }
-
-    /* ── FOOTER ── */
-    footer {
-      background: var(--green-dark); color: rgba(255,255,255,0.5);
-      padding: 1.25rem 2.5rem; font-size: 0.8rem;
-      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-    }
-    footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
-    footer a:hover { color: #fff; }
-    .footer-right { display: flex; gap: 1.5rem; }
-
   </style>
 </head>
 <body>
@@ -452,7 +468,7 @@
     <a href="/index">B73 Enrichment</a>
     <a href="/nonb73">Non-B73 Enrichment</a>
     <a href="/analytics">Other Analytics</a>
-    <a href="/rnaseq" class="active">RNA-Seq Analysis</a>
+    <a href="/rnaseq" class="active">RNA-seq Analysis</a>
     <a href="/data-sources">Data Sources</a>
     <a href="/faq">FAQ</a>
   </div>
@@ -478,7 +494,7 @@
       </div>
       <div class="mode-selector">
         <button class="mode-btn active" id="mode-upload" onclick="setMode('upload')" style="pointer-events:auto;">
-          <span class="mode-icon" style="pointer-events:none;">📂</span><span style="pointer-events:none;">Upload RNA-Seq Data</span>
+          <span class="mode-icon" style="pointer-events:none;">📂</span><span style="pointer-events:none;">Upload RNA-seq Data</span>
         </button>
         <button class="mode-btn" id="mode-browse" onclick="setMode('browse')" style="pointer-events:auto;">
           <span class="mode-icon" style="pointer-events:none;display:block;height:2.6rem;line-height:2.6rem;">
@@ -490,7 +506,7 @@
       <!-- Upload sub-panel -->
       <div id="upload-subpanel">
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-          <div class="drop-zone-icon"></div>
+          <div class="drop-zone-icon">📂</div>
           <div id="drop-zone-text">Click or drag &amp; drop your EdgeR, DESeq2, etc. data in .txt, .tsv, or .csv format</div>
         </div>
         <input type="file" id="file-input" accept=".txt,.tsv,.csv">
@@ -586,7 +602,7 @@
     <!-- ── MaizeGDB STUDY BROWSER ── -->
     <div id="browser-panel">
       <div style="margin-bottom:1.25rem;">
-        <div style="font-size:1rem;font-weight:600;color:var(--green-dark);margin-bottom:0.25rem;">MaizeGDB Curated RNA-Seq Studies</div>
+        <div style="font-size:1rem;font-weight:600;color:var(--green-dark);margin-bottom:0.25rem;">MaizeGDB Curated RNA-seq Studies</div>
         <div style="font-size:0.82rem;color:#888;">Search by keyword or filter by category, then click a study to load it.</div>
       </div>
 
@@ -642,7 +658,7 @@
       </div>
       <div class="mapper-error" id="mapper-error"></div>
       <div style="position:relative;margin-bottom:0.75rem;">
-        <span style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none;"></span>
+        <span style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none;">🔍</span>
         <input type="text" id="mapper-search"
           placeholder="Search column names…"
           style="width:100%;padding:0.45rem 0.75rem 0.45rem 2.1rem;border:1px solid var(--border);border-radius:7px;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;background:#fff;color:var(--ink);"
@@ -730,6 +746,8 @@
           <span class="volcano-hl-status" id="volcano-hl-status"></span>
         </div>
       </div>
+
+
     </div>
   </div>
 </div>
@@ -745,7 +763,6 @@ let _currentMode      = "upload";   // "upload" | "browse"
 let _allStudies       = [];         // parsed from rnaseq_studies.txt
 let _volcanoHighlightSet = new Set(); // genes to highlight on the volcano plot
 let _selectedStudy    = null;       // currently highlighted study card
-let _browseText       = "";         // raw text of the fetched study, held for re-plotting
 let _yAxisLabel       = "−log₁₀(FDR)"; // updated by mapper or reset by parseEdgeR
 let _xAxisLabel       = "log₂ Fold Change"; // updated by browse column choice
 
@@ -757,27 +774,27 @@ function setMode(mode) {
   document.getElementById("upload-subpanel").style.display = mode === "upload" ? "" : "none";
   document.getElementById("browse-subpanel").style.display = mode === "browse" ? "" : "none";
 
-  // Always reset data and UI state when switching modes
-  _rawData = [];
-  const volcano     = document.getElementById("volcano-container");
+  const browser  = document.getElementById("browser-panel");
   const placeholder = document.getElementById("placeholder");
-  const browser     = document.getElementById("browser-panel");
-
-  volcano.style.display = "none";
-  placeholder.style.display = "flex";
-  document.getElementById("mapper-panel").classList.remove("visible");
-  document.getElementById("browse-col-choice").style.display = "none";
-  document.getElementById("apply-thresh-btn").disabled = true;
-  document.getElementById("reset-thresh-btn").disabled = true;
-  document.getElementById("reset-data-btn").disabled   = true;
+  const volcano  = document.getElementById("volcano-container");
 
   if (mode === "browse") {
     browser.classList.add("visible");
-    document.getElementById("placeholder-text").textContent = "Select a study from the list to generate a volcano plot.";
+    // Only show placeholder if no volcano data loaded
+    if (!_rawData.length) {
+      placeholder.style.display = "flex";
+      document.getElementById("placeholder-text").textContent = "Select a study from the list to generate a volcano plot.";
+      volcano.style.display = "none";
+    }
     if (!_allStudies.length) loadStudyList();
   } else {
     browser.classList.remove("visible");
-    document.getElementById("placeholder-text").textContent = "Upload an EdgeR output file to generate a volcano plot.";
+    document.getElementById("browse-col-choice").style.display = "none";
+    if (!_rawData.length) {
+      placeholder.style.display = "flex";
+      document.getElementById("placeholder-text").textContent = "Upload an EdgeR output file to generate a volcano plot.";
+      volcano.style.display = "none";
+    }
   }
 }
 
@@ -863,6 +880,8 @@ function selectStudy(s) {
   btn.classList.add("visible");
   btn.textContent = `▶ Load: ${_selectedStudy.display_name || formatStudyTitle(_selectedStudy.filename)}`;
 }
+
+let _browseText = ""; // raw text of the fetched study, held for re-plotting
 
 async function loadSelectedStudy() {
   if (!_selectedStudy) return;
@@ -1068,10 +1087,10 @@ function renderMapperRows(_parsedHeader, dataRow, autoGeneIdx, guessRole, isAlre
       <td>
         <select class="mapper-role-sel role-${autoRole || "none"}" data-col="${i}" onchange="onRoleChange(this)">
           <option value=""    ${!autoRole           ? "selected":""}>— Ignore</option>
-          <option value="gene"${autoRole==="gene"   ? "selected":""}>Gene ID</option>
-          <option value="fc"  ${autoRole==="fc"     ? "selected":""}>Log Fold Change</option>
-          <option value="pval"${autoRole==="pval"   ? "selected":""}>p-value</option>
-          <option value="fdr" ${autoRole==="fdr"    ? "selected":""}>FDR / Adj. p-value</option>
+          <option value="gene"${autoRole==="gene"   ? "selected":""}>🔑 Gene ID</option>
+          <option value="fc"  ${autoRole==="fc"     ? "selected":""}>📈 Log Fold Change</option>
+          <option value="pval"${autoRole==="pval"   ? "selected":""}>🔬 p-value</option>
+          <option value="fdr" ${autoRole==="fdr"    ? "selected":""}>✅ FDR / Adj. p-value</option>
         </select>
       </td>
       <td class="mapper-transform-cell" id="transform-cell-${i}">
@@ -1250,6 +1269,35 @@ document.getElementById("reset-data-btn").addEventListener("click", () => {
   document.getElementById("reset-data-btn").disabled   = true;
 });
 
+// parseEdgeR kept for legacy — MaizeGDB now uses plotBrowseStudy
+function parseEdgeR(text) {
+  _yAxisLabel = "−log₁₀(FDR)";
+  _xAxisLabel = "log₂ Fold Change";
+  updateThreshLabel();
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error("File appears empty.");
+  const firstLine = lines[0].split(/\t/);
+  let dataStart = (firstLine[0].toLowerCase().includes("logfc") || firstLine[0].toLowerCase().includes("log")) ? 1 : 0;
+  const rows = [];
+  for (let i = dataStart; i < lines.length; i++) {
+    const parts = lines[i].split(/\t/);
+    if (parts.length < 6) continue;
+    const gene = parts[0].trim();
+    const logFC = parseFloat(parts[1]), logCPM = parseFloat(parts[2]);
+    const F = parseFloat(parts[3]), pval = parseFloat(parts[4]), fdr = parseFloat(parts[5]);
+    if (!gene || isNaN(logFC) || isNaN(fdr)) continue;
+    rows.push({ gene, logFC, logCPM, F, pval, fdr });
+  }
+  if (rows.length === 0) throw new Error("No valid data rows found.");
+  _rawData = rows;
+  document.getElementById("apply-thresh-btn").disabled = false;
+  document.getElementById("reset-thresh-btn").disabled = false;
+  _threshFC  = parseFloat(document.getElementById("thresh-fc").value)  || 2;
+  _threshFDR = parseFloat(document.getElementById("thresh-fdr").value) || 2;
+  detectGenomeFromGenes(rows.map(r => r.gene));
+  drawVolcano();
+}
+
 function showFileWarn(msg) {
   const w = document.getElementById("file-warn"); w.textContent = msg; w.classList.add("show");
 }
@@ -1319,35 +1367,21 @@ function updateSendButtons() {
   document.getElementById("send-down-count").textContent = downGenes.length.toLocaleString() + " genes";
   document.getElementById("send-all-count").textContent  = allGenes.length.toLocaleString()  + " genes";
 
-
+  // Store lists for click handlers
+  upBtn._genes   = upGenes;
+  downBtn._genes = downGenes;
+  allBtn._genes  = allGenes;
 }
 
 // ── Send to Enrichment ──
-document.getElementById("send-up-btn").addEventListener("click", function() {
-  if (this.disabled) return;
-  const genes = _rawData.filter(r => r.logFC >= _threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
-  if (!genes.length) return;
-  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
-  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
-  window.location.href = targetUrl + "?prefill=1";
-});
-
-document.getElementById("send-down-btn").addEventListener("click", function() {
-  if (this.disabled) return;
-  const genes = _rawData.filter(r => r.logFC <= -_threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
-  if (!genes.length) return;
-  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
-  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
-  window.location.href = targetUrl + "?prefill=1";
-});
-
-document.getElementById("send-all-btn").addEventListener("click", function() {
-  if (this.disabled) return;
-  const genes = _rawData.filter(r => Math.abs(r.logFC) >= _threshFC && -Math.log10(Math.max(r.fdr, 1e-300)) >= _threshFDR);
-  if (!genes.length) return;
-  const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
-  sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
-  window.location.href = targetUrl + "?prefill=1";
+["send-up-btn","send-down-btn","send-all-btn"].forEach(id => {
+  document.getElementById(id).addEventListener("click", function() {
+    const genes = this._genes;
+    if (!genes || !genes.length) return;
+    const targetUrl = (_detectedGenotype === null || _detectedGenotype === "B73") ? "/index" : "/nonb73";
+    sessionStorage.setItem("feta_prefill_genes", genes.map(r => r.gene).join("\n"));
+    window.location.href = targetUrl + "?prefill=1";
+  });
 });
 
 // ── Draw Volcano ──
@@ -1407,6 +1441,7 @@ function drawVolcano() {
     .attr("fill", r => dotColor(r))
     .attr("stroke", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? "#c49428" : "none")
     .attr("stroke-width", r => (_volcanoHighlightSet.size > 0 && _volcanoHighlightSet.has(r.gene.toLowerCase())) ? 2 : 0)
+    .style("cursor","pointer")
     .on("mousemove", function(event, r) {
       tooltip.style.display = "block";
       tooltip.style.left = (event.clientX + 14) + "px";
@@ -1655,32 +1690,6 @@ document.getElementById("volcano-hl-input").addEventListener("keydown", function
   if (e.key === "Enter") applyVolcanoHighlight();
 });
 </script>
-
-<!-- feedback form -->
-<script type="text/javascript">
-  window.ATL_JQ_PAGE_PROPS = {
-    '883299e6': {  // feedback
-      "triggerFunction": function(showCollectorDialog) {
-        //Requires that jQuery is available!
-        jQuery(".feedback-form").click(function(e) {
-          e.preventDefault();
-          showCollectorDialog();
-        });
-      },
-      fieldValues: {
-        recordWebInfo: '1', // field Name
-        recordWebInfoConsent: ['1'] // field Id
-      }
-    }
-  };
-</script>
-
-<footer style="margin-top:2rem;">
-  <span>FETA — Functional Enrichment Term Analysis &nbsp;·&nbsp; Hosted by <a href="https://maizegdb.org" target="_blank">MaizeGDB</a></span>
-  <div class="footer-right">
-    <a href="#!" class="feedback-form">Contact us</a>
-  </div>
-</footer>
 
 </body>
 </html>
