@@ -114,6 +114,7 @@
     .tool-card:hover::before { opacity: 1; }
     .tool-card-name { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); line-height: 1.3; }
     .tool-card-desc { font-size: 0.75rem; color: #777; line-height: 1.4; }
+    .tool-card .hero-logo { align-self: center; max-height: 80px; max-width: 100%; width: auto; height: auto; object-fit: contain; margin-top: 0.5rem; }
 
     /* ── CITATION BANNER ── */
     .cite-banner {
@@ -239,6 +240,7 @@
         <span class="tool-card-name">Non-B73 Enrichment</span>
         <span class="tool-card-desc">Enrichment analyses on gene lists from non-reference genomes. 
           GO term, pathway, and metabolic ontologies are currently supported. </span>
+          <br>
           <img src="{{ url_for('static', filename='images/nonb73_icon2.svg') }}" class="hero-logo">
       </a>
       <a href="/rnaseq" class="tool-card" style="--tool-color:var(--peach);">
