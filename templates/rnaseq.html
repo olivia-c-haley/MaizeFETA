@@ -888,7 +888,7 @@ async function loadSelectedStudy() {
   const btn = document.getElementById("load-study-btn");
   btn.textContent = "Loading…"; btn.disabled = true;
   try {
-    const resp = await fetch(`/rnaseq_file/${encodeURIComponent(_selectedStudy.filename)}`);
+    const resp = await fetch(`/rnaseq_filepath/${encodeURIComponent(_selectedStudy.filename)}`);
     if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
     _browseText = await resp.text();
     _filename   = _selectedStudy.filename.replace(/\.[^.]+$/, "");

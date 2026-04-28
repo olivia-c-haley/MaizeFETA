@@ -213,12 +213,13 @@ def rnaseq_studies():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/rnaseq_directory/<path:filename>", methods=["GET"])
-def rnaseq_file(filename):
+@app.route("/rnaseq_filepath/<path:filename>", methods=["GET"])
+def rnaseq_filepath(filename):
     import os
     # Sanitise — only allow filenames with no directory separators
     safe = os.path.basename(filename)
     filepath = os.path.join("data/rnaseq", safe)
+    print(f"Looking for file at: {os.path.abspath(filepath)}")
     if not os.path.isfile(filepath):
         return jsonify({"error": f"File not found: {safe}"}), 404
     try:
