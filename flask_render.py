@@ -8,7 +8,7 @@ from statsmodels.stats.multitest import multipletests
 app = Flask(__name__)
 
 # ── B73 paths ────────────────────────────────────────────────────────────────
-B73_DIR = "data//B73"
+B73_DIR = "data/B73"
 
 B73_GENE_MODEL_FILE = f"{B73_DIR}/B73.tsv"
 
@@ -16,13 +16,13 @@ B73_ONTOLOGY_FILES = {
     "gomap":      f"{B73_DIR}/gomap_go_v5.tsv",
     "entapgo":    f"{B73_DIR}/entap_go_v5.tsv",
     "pannzergo":  f"{B73_DIR}/pannzer_go_v5.tsv",
-    "goexpanded": f"{B73_DIR}/expanded_go.tsv",
+    "goexpanded": f"{B73_DIR}/expanded_go_v5.tsv",
     "entapkegg":  f"{B73_DIR}/entap_kegg_v5.tsv",
     "metacyc":    f"{B73_DIR}/corncyc_v5.tsv",
     "reactome":   f"{B73_DIR}/reactome_v5.tsv",
     "pannzerec":  f"{B73_DIR}/pannzer_enzyme_commission_v5.tsv",
     "e2p2ec":     f"{B73_DIR}/e2p2_enzyme_commission_v5.tsv",
-    "ecexpanded": f"{B73_DIR}/expanded_ec.tsv",
+    "ecexpanded": f"{B73_DIR}/expanded_ec_v5.tsv",
     "pfam":       f"{B73_DIR}/pfam_v5.tsv",
     "scatac":     f"{B73_DIR}/scatac_v5.tsv",
     "loci":       f"{B73_DIR}/loci_v5.tsv",
@@ -33,7 +33,7 @@ B73_ONTOLOGY_FILES = {
 }
 
 # ── Non-B73 paths ─────────────────────────────────────────────────────────────
-NON_B73_DIR = "data//nonB73"
+NON_B73_DIR = "data/nonB73"
 
 NON_B73_GENOTYPES = [
     "B97","CML52","CML69","CML103","CML228","CML247","CML277",
@@ -54,8 +54,7 @@ NON_B73_ONTOLOGY_TEMPLATES = {
     "interproscan": "{genotype}_interproscan.tsv",
 }
 
-
-# ── Genotype prefix lookup (loaded lazily from data//genotypes.txt) ───────────
+# ── Genotype prefix lookup (loaded lazily from data/genotypes.txt) ───────────
 _GENOTYPE_PREFIXES = None
 
 def get_genotype_prefixes():
@@ -63,7 +62,7 @@ def get_genotype_prefixes():
     global _GENOTYPE_PREFIXES
     if _GENOTYPE_PREFIXES is None:
         try:
-            df = pd.read_csv("data//genotypes.txt", sep="\t")
+            df = pd.read_csv("data/genotypes.txt", sep="\t")
             _GENOTYPE_PREFIXES = dict(zip(df["PREFIX"], df["GENOTYPE"]))
         except Exception as e:
             print(f"WARNING: could not load genotypes.txt: {e}")
@@ -157,11 +156,10 @@ def run_enrichment(classification_file, query_genes, background_genes, p_value_t
         for r, p_corr in zip(results, corrected):
             r["adj_p_value"] = 1.0 if isnan(p_corr) else float(p_corr)
     else:
-        # Fallback — treat unrecognised method as BH
-        pvals     = [r["p_value"] for r in results]
-        corrected = multipletests(pvals, method="fdr_bh")[1]
-        for r, p_corr in zip(results, corrected):
-            r["adj_p_value"] = 1.0 if isnan(p_corr) else float(p_corr)
+        # Fallback — treat unrecognised method as Bonferroni
+        n = len(results)
+        for r in results:
+            r["adj_p_value"] = float(min(r["p_value"] * n, 1.0))
 
     return [r for r in results if r["adj_p_value"] <= p_value_cutoff]
 
@@ -190,7 +188,7 @@ def rnaseq():
 @app.route("/rnaseq_studies", methods=["GET"])
 def rnaseq_studies():
     import os, csv
-    studies_file = "data//rnaseq_studies.txt"
+    studies_file = "data/rnaseq_studies.txt"
     try:
         studies = []
         try:
@@ -215,12 +213,12 @@ def rnaseq_studies():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/rnaseq_file/<path:filename>", methods=["GET"])
+@app.route("/rnaseq_directory/<path:filename>", methods=["GET"])
 def rnaseq_file(filename):
     import os
     # Sanitise — only allow filenames with no directory separators
     safe = os.path.basename(filename)
-    filepath = os.path.join("data//rnaseq", safe)
+    filepath = os.path.join("data/rnaseq", safe)
     if not os.path.isfile(filepath):
         return jsonify({"error": f"File not found: {safe}"}), 404
     try:
@@ -507,7 +505,7 @@ def upload():
     if not query_genes:
         return jsonify({"error": "No genes provided."}), 400
 
-    p_value_type   = request.form.get("evaluation", "Benjamini-Hochberg")
+    p_value_type   = request.form.get("evaluation", "Bonferroni")
     p_value_cutoff = float(request.form.get("pvalue", 0.05))
 
     gene_model_df    = pd.read_csv(B73_GENE_MODEL_FILE, sep="\t")
@@ -553,7 +551,7 @@ def upload_nonb73():
     if not query_genes:
         return jsonify({"error": "No genes provided."}), 400
 
-    p_value_type   = request.form.get("evaluation", "Benjamini-Hochberg")
+    p_value_type   = request.form.get("evaluation", "Bonferroni")
     p_value_cutoff = float(request.form.get("pvalue", 0.05))
 
     bg_file = f"{NON_B73_DIR}/{background}.tsv"
